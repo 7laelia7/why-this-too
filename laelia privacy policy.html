@@ -7,12 +7,13 @@
 
 <style>
 :root {
-  --bg:#0f1115;
-  --card:#161a22;
-  --text:#e8ecf1;
-  --muted:#a9b1bd;
-  --accent:#7aa2ff;
-  --border:#242938;
+  --bg:#000000;
+  --card:#0a0a0a;
+  --text:#ffffff;
+  --muted:#c5c5c5;
+  --accent:#7cd1ff;
+  --accent2:#ffb86c;
+  --border:#333333;
 }
 
 * {
@@ -28,6 +29,10 @@ body {
   padding:40px 20px;
 }
 
+body * {
+  color:var(--text) !important;
+}
+
 .container {
   max-width:900px;
   margin:auto;
@@ -37,6 +42,10 @@ body {
   border:1px solid var(--border);
 }
 
+h1, h2, h3, h4, h5, h6 {
+  color:#ffffff !important;
+}
+
 h1 {
   font-size:2.4rem;
   margin-top:0;
@@ -44,7 +53,7 @@ h1 {
 }
 
 .updated {
-  color:var(--muted);
+  color:var(--muted) !important;
   margin-bottom:40px;
   font-size:0.95rem;
 }
@@ -56,25 +65,48 @@ h2 {
   padding-bottom:6px;
 }
 
-p {
-  margin:1rem 0;
-  color:var(--text);
+p, li, span, div, td, th {
+  color:var(--text) !important;
 }
 
-a {
-  color:var(--accent);
-  text-decoration:none;
+a, a * {
+  color:var(--accent) !important;
 }
 
-a:hover {
-  text-decoration:underline;
+a:hover, a:hover * {
+  color:var(--accent2) !important;
+  text-decoration:underline !important;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #090909;
+}
+
+th, td {
+  padding: 12px 10px;
+  border: 1px solid #444;
+  vertical-align: top;
+}
+
+th {
+  background: #111;
+}
+
+td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+table, th, td {
+  border-color:#444 !important;
 }
 
 .footer {
   margin-top:60px;
   padding-top:25px;
   border-top:1px solid var(--border);
-  color:var(--muted);
+  color:var(--muted) !important;
   font-size:0.9rem;
 }
 
@@ -94,20 +126,6 @@ a:hover {
 <div class="updated">Last updated April 3, 2026</div>
 
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.4">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
-</head>
-<body>
 <style>
 [data-custom-class='body'], [data-custom-class='body'] * {
 background: transparent !important;
@@ -115,33 +133,34 @@ background: transparent !important;
 [data-custom-class='title'], [data-custom-class='title'] * {
 font-family: Arial !important;
 font-size: 26px !important;
-color: #000000 !important;
+color: #ffffff !important;
 }
 [data-custom-class='subtitle'], [data-custom-class='subtitle'] * {
 font-family: Arial !important;
-color: #595959 !important;
+color: #d8d8d8 !important;
 font-size: 14px !important;
 }
 [data-custom-class='heading_1'], [data-custom-class='heading_1'] * {
 font-family: Arial !important;
 font-size: 19px !important;
-color: #000000 !important;
+color: #ffffff !important;
 }
 [data-custom-class='heading_2'], [data-custom-class='heading_2'] * {
 font-family: Arial !important;
 font-size: 17px !important;
-color: #000000 !important;
+color: #ffffff !important;
 }
 [data-custom-class='body_text'], [data-custom-class='body_text'] * {
-color: #595959 !important;
+color: #e3e3e3 !important;
 font-size: 14px !important;
 font-family: Arial !important;
 }
 [data-custom-class='link'], [data-custom-class='link'] * {
-color: #3030F1 !important;
+color: #7cd1ff !important;
 font-size: 14px !important;
 font-family: Arial !important;
 word-break: break-word !important;
+text-decoration: underline !important;
 }
 </style>
 
@@ -163,11 +182,6 @@ font-family: Arial ;
 </style>
 </div>
 <br><div><span data-custom-class='body_text'>This Privacy Policy was created using Termly's </span><a href="https://termly.io/products/privacy-policy-generator/" target="_blank" rel="noopener external" data-custom-class='link'>Privacy Policy Generator</a></div>
-</body>
-</html>
-
-
-
 <div class="footer">
 <p><strong>Business:</strong> Laelia Agency, LLC</p>
 <p><strong>Contact:</strong> <a href="mailto:7laelia7@gmail.com">7laelia7@gmail.com</a></p>
