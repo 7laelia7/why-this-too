@@ -854,29 +854,55 @@ updateHeader();
 
 // ── ENERGY ───────────────────────────────────────────────────
 const energyNotes = ['','low — be gentle today','low-medium — take breaks','medium — steady on','medium-high — you\'ve got this','full — use it well'];
-// Reset energy if it was saved on a previous day
-const savedEnergyDate = S.get('energyDate');
+// Energy stored per date — keeps full current week for reflection
 const todayStr = new Date().toDateString();
-let energyLevel = (savedEnergyDate === todayStr) ? (S.get('energy') || 0) : 0;
-if (savedEnergyDate !== todayStr) { S.del('energy'); }
+// Get the start of the current week (Sunday)
+const weekStart = new Date();
+weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+weekStart.setHours(0,0,0,0);
+let energyHistory = S.get('energyHistory') || {};
+// clean up anything older than this week's Sunday
+Object.keys(energyHistory).forEach(k => {
+  if (new Date(k) < weekStart) delete energyHistory[k];
+});
+S.set('energyHistory', energyHistory);
+let energyLevel = energyHistory[todayStr] || 0;
 
 function renderEnergy() {
+  const isToday = viewedDayIdx === realDayIdx;
+  // Get the date string for the viewed day this week
+  const viewedDate = new Date();
+  const diff = viewedDayIdx - realDayIdx;
+  viewedDate.setDate(viewedDate.getDate() + diff);
+  const viewedDateStr = viewedDate.toDateString();
+  const isFuture = viewedDate > new Date();
+  let displayLevel = 0;
+  let noteText = 'tap to log';
+  if (isToday) {
+    displayLevel = energyLevel;
+    noteText = energyLevel ? energyNotes[energyLevel] : 'tap to log';
+  } else if (!isFuture && energyHistory[viewedDateStr]) {
+    displayLevel = energyHistory[viewedDateStr];
+    noteText = energyNotes[displayLevel] + ' (' + orbit[viewedDayIdx].day.toLowerCase() + ')';
+  } else if (isFuture) {
+    noteText = 'not yet logged';
+  }
   document.querySelectorAll('.dot').forEach((d,i) => {
     d.className = 'dot';
-    if (i < energyLevel) {
+    if (i < displayLevel) {
       if (i < 2) d.classList.add('lit-low');
       else if (i < 4) d.classList.add('lit-mid');
       else d.classList.add('lit-high');
     }
   });
-  document.getElementById('energyNote').textContent = energyLevel ? energyNotes[energyLevel] : 'tap to log';
+  document.getElementById('energyNote').textContent = noteText;
 }
 
 document.getElementById('energyDots').addEventListener('click', e => {
   if (!e.target.classList.contains('dot')) return;
   energyLevel = parseInt(e.target.dataset.level);
-  S.set('energy', energyLevel);
-  S.set('energyDate', new Date().toDateString());
+  energyHistory[todayStr] = energyLevel;
+  S.set('energyHistory', energyHistory);
   renderEnergy();
 });
 
@@ -1215,7 +1241,7 @@ function clearDay() {
     const el = document.getElementById(k);
     if (el) el.value = '';
   });
-  S.del('energy'); S.del('focusChecks'); S.del('moods');
+  S.del('focusChecks'); S.del('moods'); energyLevel = 0; energyHistory[todayStr] = 0; S.set('energyHistory', energyHistory);
   document.querySelectorAll('.focus-item').forEach(i => i.classList.remove('done'));
   document.querySelectorAll('.mood-tag').forEach(t => t.classList.remove('selected'));
   energyLevel = 0; renderEnergy();
