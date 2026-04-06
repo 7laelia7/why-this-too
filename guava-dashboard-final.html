@@ -854,7 +854,11 @@ updateHeader();
 
 // ── ENERGY ───────────────────────────────────────────────────
 const energyNotes = ['','low — be gentle today','low-medium — take breaks','medium — steady on','medium-high — you\'ve got this','full — use it well'];
-let energyLevel = S.get('energy') || 0;
+// Reset energy if it was saved on a previous day
+const savedEnergyDate = S.get('energyDate');
+const todayStr = new Date().toDateString();
+let energyLevel = (savedEnergyDate === todayStr) ? (S.get('energy') || 0) : 0;
+if (savedEnergyDate !== todayStr) { S.del('energy'); }
 
 function renderEnergy() {
   document.querySelectorAll('.dot').forEach((d,i) => {
@@ -872,6 +876,7 @@ document.getElementById('energyDots').addEventListener('click', e => {
   if (!e.target.classList.contains('dot')) return;
   energyLevel = parseInt(e.target.dataset.level);
   S.set('energy', energyLevel);
+  S.set('energyDate', new Date().toDateString());
   renderEnergy();
 });
 
