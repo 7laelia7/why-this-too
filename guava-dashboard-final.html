@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guava — daily orbit</title>
+<link rel="apple-touch-icon" href="the daily orbit-2.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="daily orbit">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0c0a;
+    --surface: #161310;
+    --card: #1c1814;
+    --card-hover: #221e19;
+    --border: #2e2820;
+    --border-soft: #261f18;
+    --text: #f0ebe2;
+    --text-dim: #c8c0b0;
+    --muted: #8a8070;
+    --faint: #4a4035;
+    --green: #5a9e70;
+    --green-dim: #1a3a28;
+    --green-text: #8ecca0;
+    --plum: #a07ab0;
+    --plum-dim: #2e1e40;
+    --plum-text: #c8a8e0;
+    --pink: #d8788a;
+    --pink-dim: #3a1825;
+    --pink-text: #f0a0b0;
+    --gold: #d4aa58;
+    --gold-dim: #2e2208;
+    --gold-text: #f0cc80;
+    --blue: #6a8fc0;
+    --blue-dim: #142030;
+    --blue-text: #90b8e8;
+    --done: #3a3530;
+    --done-text: #5a5248;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 1.5rem 1.25rem 5rem;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade { animation: fadeUp 0.4s ease both; }
+  .fade-1 { animation-delay: 0.05s; }
+  .fade-2 { animation-delay: 0.1s; }
+  .fade-3 { animation-delay: 0.15s; }
+  .fade-4 { animation-delay: 0.2s; }
+  .fade-5 { animation-delay: 0.25s; }
+  .fade-6 { animation-delay: 0.3s; }
+
+  /* ── HEADER ── */
+  .header { margin-bottom: 1.5rem; }
+
+  .day-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .nav-arrow {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .nav-arrow:hover { border-color: var(--plum-text); color: var(--plum-text); }
+
+  .day-pips {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .day-pip {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .day-pip:hover { border-color: var(--muted); color: var(--text-dim); }
+  .day-pip.active { background: var(--plum-dim); border-color: var(--plum); color: var(--plum-text); }
+  .day-pip.today { border-color: var(--green); color: var(--green-text); }
+  .day-pip.today.active { background: var(--plum-dim); border-color: var(--plum); color: var(--plum-text); }
+
+  .today-indicator {
+    font-size: 9px;
+    color: var(--green-text);
+    letter-spacing: 0.08em;
+  }
+
+  .orbit-day {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+  }
+
+  .date-line {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 0.2rem;
+  }
+
+  .mantra {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--plum-text);
+    margin-bottom: 1rem;
+  }
+
+  .energy-row { display: flex; align-items: center; gap: 0.75rem; }
+  .energy-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .energy-dots { display: flex; gap: 5px; }
+
+  .dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid var(--faint);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .dot.lit-low { background: var(--green); border-color: var(--green); }
+  .dot.lit-mid { background: var(--gold); border-color: var(--gold); }
+  .dot.lit-high { background: var(--pink); border-color: var(--pink); }
+  .energy-note { font-size: 10px; color: var(--muted); font-style: italic; }
+
+
+  /* ── MORNING REFLECTION ── */
+  .morning-reflection {
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border-soft);
+  }
+  .morning-label {
+    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 0.4rem; display: block;
+  }
+  .morning-prompt {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 0.82rem; color: var(--plum-text);
+    margin-bottom: 0.5rem; line-height: 1.4;
+  }
+  .morning-area {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    border: none; border-bottom: 1px solid var(--border-soft);
+    background: transparent; color: var(--text);
+    width: 100%; min-height: 40px; resize: none; outline: none;
+    line-height: 1.7; padding-bottom: 0.4rem;
+  }
+  .morning-area::placeholder { color: var(--faint); }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .label-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  /* ── INTENTION ── */
+  .intention-card {
+    background: var(--plum-dim);
+    border: 1px solid #4a2870;
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.25rem;
+  }
+  .intention-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--plum-text); margin-bottom: 0.4rem; }
+  .editable-field {
+    font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.95rem;
+    border: none; background: transparent; color: var(--text); width: 100%; outline: none;
+  }
+  .editable-field::placeholder { color: #5a3880; }
+
+  /* ── UPCOMING ── */
+  .upcoming-list { display: flex; flex-direction: column; gap: 0.4rem; }
+
+  .upcoming-item {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .upcoming-item:last-child { border-bottom: none; }
+
+  .type-btn {
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 10px; border: none;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.2s;
+  }
+  .type-meeting { background: var(--blue-dim); color: var(--blue-text); }
+  .type-trip { background: var(--gold-dim); color: var(--gold-text); }
+  .type-other { background: var(--faint); color: var(--text-dim); }
+
+  .upcoming-text {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    border: none; background: transparent; color: var(--text); flex: 1; outline: none;
+  }
+  .upcoming-text::placeholder { color: var(--faint); }
+
+  .del-btn {
+    background: none; border: none; color: transparent;
+    cursor: pointer; font-size: 15px; padding: 0 2px;
+    line-height: 1; flex-shrink: 0; transition: color 0.2s;
+  }
+  .upcoming-item:hover .del-btn { color: var(--faint); }
+  .del-btn:hover { color: var(--pink) !important; }
+
+  .add-upcoming-btn {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    color: var(--muted); background: none; border: none;
+    cursor: pointer; padding: 0.4rem 0 0;
+    letter-spacing: 0.06em; display: block; transition: color 0.2s;
+  }
+  .add-upcoming-btn:hover { color: var(--text); }
+
+  /* ── SPRINT ── */
+  .sprint-card {
+    background: var(--green-dim);
+    border: 1px solid #2a5038;
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .sprint-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+
+  .sprint-edit-btn {
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: none; border: 1px solid #2a5038;
+    color: var(--green-text); border-radius: 10px;
+    padding: 2px 8px; cursor: pointer; transition: all 0.2s;
+  }
+  .sprint-edit-btn:hover { border-color: var(--green-text); }
+
+  .sprint-items { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.85rem; }
+
+  .sprint-item {
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .sprint-item-text {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    border: none; background: transparent; color: var(--text);
+    flex: 1; outline: none; padding: 0;
+  }
+  .sprint-item-text[readonly] { cursor: default; }
+
+  .sprint-status {
+    font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 10px; white-space: nowrap; flex-shrink: 0;
+  }
+
+  .sprint-status-btn {
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 10px; border: none;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.2s;
+  }
+
+  .status-active { background: var(--green); color: #0a1a10; }
+  .status-next { background: var(--faint); color: var(--muted); }
+  .status-done { background: var(--done); color: var(--done-text); }
+
+  .progress-row { display: flex; align-items: center; gap: 0.75rem; }
+  .progress-track { flex: 1; height: 3px; background: #1a4028; border-radius: 10px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green-text); border-radius: 10px; transition: width 0.5s ease; }
+  .progress-label { font-size: 10px; color: var(--green-text); white-space: nowrap; }
+
+  /* ── FOCUS ── */
+  .focus-title { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--text); margin-bottom: 0.2rem; }
+  .focus-sub { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.85rem; }
+  .focus-items { display: flex; flex-direction: column; gap: 3px; }
+
+  .focus-item {
+    display: flex; align-items: center; gap: 0.65rem;
+    padding: 0.5rem 0; border-bottom: 1px solid var(--border-soft);
+  }
+  .focus-item:last-child { border-bottom: none; }
+
+  .focus-num { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--faint); width: 18px; flex-shrink: 0; line-height: 1; }
+
+  .focus-input {
+    font-family: 'DM Mono', monospace; font-size: 12.5px;
+    border: none; background: transparent; color: var(--text); width: 100%; outline: none;
+  }
+  .focus-input::placeholder { color: var(--faint); }
+
+  .focus-check {
+    width: 15px; height: 15px; border: 1.5px solid var(--border);
+    border-radius: 3px; flex-shrink: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .focus-item.done .focus-check { background: var(--green); border-color: var(--green); }
+  .focus-item.done .focus-check::after { content: '✓'; font-size: 9px; color: #0a1a10; }
+  .focus-item.done .focus-input { text-decoration: line-through; color: var(--done-text); }
+
+  /* ── TABS ── */
+  .tabs-wrapper { margin-bottom: 1.25rem; }
+
+  .tabs {
+    display: flex; overflow-x: auto;
+    border-bottom: 1px solid var(--border); scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.5rem 1rem; border: none;
+    background: var(--surface); color: var(--muted);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    margin-bottom: -1px; white-space: nowrap; transition: all 0.2s;
+  }
+  .tab:hover { color: var(--text-dim); }
+  .tab.active { background: var(--card); color: var(--text); border-bottom-color: var(--plum-text); }
+
+  .tab-panel {
+    display: none; padding: 1rem;
+    background: var(--card);
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 10px 10px;
+  }
+  .tab-panel.active { display: block; }
+
+  /* ── ACCORDION ── */
+  .accordion { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; overflow: hidden; }
+
+  .accordion-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.65rem 0.85rem; cursor: pointer;
+    background: var(--surface); transition: background 0.15s;
+  }
+  .accordion-header:hover { background: var(--card-hover); }
+
+  .accordion-title { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
+  .accordion-meta { display: flex; align-items: center; gap: 0.5rem; }
+  .accordion-count { font-size: 10px; color: var(--muted); }
+  .accordion-arrow { font-size: 10px; color: var(--muted); transition: transform 0.2s; }
+  .accordion.open .accordion-arrow { transform: rotate(180deg); }
+
+  .accordion-body { display: none; padding: 0.5rem 0.85rem 0.75rem; background: var(--bg); }
+  .accordion.open .accordion-body { display: block; }
+
+  /* ── TASKS ── */
+  .task-list { display: flex; flex-direction: column; gap: 1px; }
+
+  .task {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.45rem 0.4rem; border-radius: 5px; transition: background 0.15s;
+  }
+  .task:hover { background: var(--card); }
+
+  .task-checkbox {
+    width: 13px; height: 13px; border: 1.5px solid var(--border);
+    border-radius: 3px; flex-shrink: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .task.done .task-checkbox { background: var(--done); border-color: var(--done); }
+  .task.done .task-checkbox::after { content: '✓'; font-size: 8px; color: var(--muted); }
+
+  .task-name {
+    font-size: 12px; color: var(--text); flex: 1;
+    border: none; background: transparent; outline: none;
+    font-family: 'DM Mono', monospace; padding: 0; min-width: 0;
+  }
+  .task.done .task-name { text-decoration: line-through; color: var(--done-text); }
+
+  .task-del {
+    background: none; border: none; color: transparent;
+    cursor: pointer; font-size: 14px; padding: 0 2px;
+    flex-shrink: 0; line-height: 1; transition: color 0.2s;
+  }
+  .task:hover .task-del { color: var(--faint); }
+  .task-del:hover { color: var(--pink) !important; }
+
+  .add-task {
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    border: 1px dashed var(--border); border-radius: 5px;
+    padding: 0.35rem 0.6rem; width: 100%;
+    background: transparent; color: var(--text); outline: none;
+    margin-top: 0.4rem; transition: border-color 0.2s;
+  }
+  .add-task:focus { border-color: var(--muted); }
+  .add-task::placeholder { color: var(--faint); }
+
+  /* ── MONTH STATUS ── */
+  .month-status {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.5rem 0; border-bottom: 1px solid var(--border-soft);
+  }
+  .month-status:last-child { border-bottom: none; }
+  .month-name { font-size: 12px; color: var(--text); flex: 1; }
+
+  .month-name-input {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    border: none; background: transparent; color: var(--text);
+    flex: 1; outline: none; padding: 0;
+  }
+  .month-name-input[readonly] { cursor: default; }
+
+  .month-badge {
+    font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+  }
+  .badge-active { background: var(--pink-dim); color: var(--pink-text); }
+  .badge-next { background: var(--border-soft); color: var(--muted); }
+  .badge-done { background: var(--green-dim); color: var(--green-text); }
+
+  /* ── SECTION SEP ── */
+  .section-sep { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); padding: 0.85rem 0 0.4rem; }
+
+  /* ── BRAIN/EOD ── */
+  .brain-area {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    border: none; background: transparent; color: var(--text);
+    width: 100%; min-height: 70px; resize: none; outline: none; line-height: 1.7;
+  }
+  .brain-area::placeholder { color: var(--faint); }
+
+  .orbit-prompt { font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.9rem; color: var(--plum-text); margin-bottom: 0.5rem; line-height: 1.4; }
+  .learn-prompt { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-top: 0.85rem; margin-bottom: 0.5rem; }
+
+  .eod-area {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    border: none; border-bottom: 1px solid var(--border-soft);
+    background: transparent; color: var(--text);
+    width: 100%; min-height: 45px; resize: none; outline: none;
+    line-height: 1.7; padding-bottom: 0.5rem; margin-bottom: 0.85rem;
+  }
+  .eod-area::placeholder { color: var(--faint); }
+
+  /* ── MOOD TAGS ── */
+  .mood-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+  .mood-tag { font-size: 10px; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: all 0.2s; }
+  .mood-tag.selected { background: var(--plum); color: var(--text); border-color: var(--plum); }
+
+  /* ── CLEAR ── */
+  .clear-row { display: flex; gap: 0.5rem; margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid var(--border-soft); }
+  .clear-btn {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.3rem 0.75rem; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer; transition: all 0.2s;
+  }
+  .clear-btn:hover { border-color: var(--pink); color: var(--pink-text); }
+
+  /* ── QUICK LINKS ── */
+  .links { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  .link-btn {
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.4rem 0.85rem; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer; text-decoration: none;
+    transition: all 0.2s; display: inline-block;
+  }
+  .link-btn:hover { border-color: var(--text); color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header fade fade-1">
+  <div class="day-nav">
+    <button class="nav-arrow" id="prevDay" onclick="shiftDay(-1)">‹</button>
+    <div class="day-pips" id="dayPips"></div>
+    <button class="nav-arrow" id="nextDay" onclick="shiftDay(1)">›</button>
+    <span class="today-indicator" id="todayIndicator"></span>
+  </div>
+  <div class="orbit-day" id="orbitDay"></div>
+  <div class="date-line" id="dateLine"></div>
+  <div class="mantra" id="mantraLine"></div>
+  <div class="energy-row">
+    <div class="energy-label">energy</div>
+    <div class="energy-dots" id="energyDots">
+      <div class="dot" data-level="1"></div>
+      <div class="dot" data-level="2"></div>
+      <div class="dot" data-level="3"></div>
+      <div class="dot" data-level="4"></div>
+      <div class="dot" data-level="5"></div>
+    </div>
+    <div class="energy-note" id="energyNote">tap to log</div>
+  </div>
+  </div>
+
+<!-- WEEKLY INTENTION -->
+<div class="intention-card fade fade-2">
+  <div class="intention-label">weekly intention</div>
+  <input class="editable-field" id="weeklyIntention" placeholder="set your intention for the week…">
+</div>
+
+<!-- MORNING REFLECTION -->
+<div class="card fade fade-2" style="border-color: #4a2870; background: var(--plum-dim);">
+  <span class="morning-label" style="font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--plum-text); margin-bottom:0.4rem; display:block;">morning reflection</span>
+  <div class="morning-prompt" id="morningPrompt"></div>
+  <textarea class="morning-area" id="morningReflect" placeholder="write your response…"></textarea>
+</div>
+
+<!-- UPCOMING -->
+<div class="card fade fade-2">
+  <div class="section-label">
+    <span class="label-dot" style="background:var(--blue-text)"></span>
+    upcoming
+  </div>
+  <div class="upcoming-list" id="upcomingList"></div>
+  <button class="add-upcoming-btn" onclick="addUpcoming()">+ add meeting or trip</button>
+</div>
+
+<!-- CURRENT SPRINT -->
+<div class="sprint-card fade fade-3">
+  <div class="sprint-header">
+    <div class="section-label" style="margin-bottom:0">
+      <span class="label-dot" style="background:var(--green-text)"></span>
+      current sprint
+    </div>
+    <button class="sprint-edit-btn" id="sprintEditBtn" onclick="toggleSprintEdit()">edit</button>
+  </div>
+  <div class="sprint-items" id="sprintItems"></div>
+  <div id="sprintAddRow" style="display:none; margin-bottom:0.5rem;">
+    <input class="add-task" id="sprintAddInput" placeholder="+ add sprint item (enter)" onkeydown="addSprintItem(event)">
+  </div>
+  <div class="progress-row">
+    <div class="progress-track">
+      <div class="progress-fill" id="sprintFill" style="width:35%"></div>
+    </div>
+    <div class="progress-label" id="sprintProgress">in progress</div>
+  </div>
+</div>
+
+
+
+<!-- TODAY'S THREE -->
+<div class="card fade fade-3">
+  <div class="focus-title">today's three</div>
+  <div class="focus-sub">non-negotiables</div>
+  <div class="focus-items">
+    <div class="focus-item"><div class="focus-num">1</div><input class="focus-input" id="today-1" placeholder="what must happen today…"><div class="focus-check" onclick="toggleFocus(this)"></div></div>
+    <div class="focus-item"><div class="focus-num">2</div><input class="focus-input" id="today-2" placeholder="second non-negotiable…"><div class="focus-check" onclick="toggleFocus(this)"></div></div>
+    <div class="focus-item"><div class="focus-num">3</div><input class="focus-input" id="today-3" placeholder="and one more…"><div class="focus-check" onclick="toggleFocus(this)"></div></div>
+  </div>
+</div>
+
+
+
+<!-- BRAIN DUMP -->
+<div class="card fade fade-5">
+  <div class="section-label" style="margin-bottom:0.5rem">
+    <span class="label-dot" style="background:var(--gold-text)"></span>brain dump
+  </div>
+  <textarea class="brain-area" id="brainDump" placeholder="what's looping in your head right now… get it out of there"></textarea>
+</div>
+
+
+
+<div class="divider fade fade-4"></div>
+
+
+
+<!-- DOMAIN TABS -->
+<div class="tabs-wrapper fade fade-4">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('laelia',this)">Laelia</button>
+    <button class="tab" onclick="switchTab('baaaad',this)">baaaad.fm</button>
+    <button class="tab" onclick="switchTab('baby',this)">baby guava</button>
+    <button class="tab" onclick="switchTab('home',this)">home</button>
+  </div>
+
+  <!-- LAELIA -->
+  <div class="tab-panel active" id="panel-laelia">
+    <div class="section-sep">ecosystem maintenance</div>
+    <div class="accordion open">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">botanica</span><div class="accordion-meta"><span class="accordion-count">wellness</span><span class="accordion-arrow">▾</span></div></div>
+      <div class="accordion-body"><div class="task-list" id="tl-botanica"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-botanica')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">expand</span><div class="accordion-meta"><span class="accordion-count">business & career</span><span class="accordion-arrow">▾</span></div></div>
+      <div class="accordion-body"><div class="task-list" id="tl-expand"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-expand')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">awaken</span><div class="accordion-meta"><span class="accordion-count">media house</span><span class="accordion-arrow">▾</span></div></div>
+      <div class="accordion-body"><div class="task-list" id="tl-awaken"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-awaken')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">learn</span><div class="accordion-meta"><span class="accordion-count">education</span><span class="accordion-arrow">▾</span></div></div>
+      <div class="accordion-body"><div class="task-list" id="tl-learn"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-learn')"></div>
+    </div>
+    <div class="section-sep">core operations</div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">strategy & development</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-sd"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-sd')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">client success</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-cs"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-cs')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">events</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-events"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-events')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">communications · HR · accounting · IT</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-ops"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-ops')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">attract funding</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-funding"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-funding')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">design</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-design"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-design')"></div>
+    </div>
+  </div>
+
+  <!-- BAAAAD.FM -->
+  <div class="tab-panel" id="panel-baaaad">
+    <div class="accordion open">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">monthly fire</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body">
+        <div id="monthlyFireList"></div>
+        <div id="monthlyFireEditRow" style="display:none; margin-top:0.4rem;">
+          <input class="add-task" id="monthlyFireInput" placeholder="+ add month — name (enter)" onkeydown="addMonthlyFire(event)">
+        </div>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">playlist writeups</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-writeups"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-writeups')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">chakra playlists</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-chakra"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-chakra')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">editorial</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-editorial"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-editorial')"></div>
+    </div>
+
+  </div>
+
+  <!-- BABY GUAVA -->
+  <div class="tab-panel" id="panel-baby">
+    <div class="accordion open">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">general operations</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-bg-ops"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-ops')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">videos (content)</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-bg-videos"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-videos')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">photos (content)</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-bg-photos"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-photos')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">music</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-bg-music"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-music')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">photography projects</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-bg-photo"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-photo')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">visual art</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-bg-art"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-art')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">solo show</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-bg-solo"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-solo')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">books</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-bg-books"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-books')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">tv/film</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-bg-tvfilm"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-tvfilm')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">from the desk of baby guava</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-bg-substack"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-substack')"></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">acting</span><span class="accordion-arrow">▾</span></div>
+      <div class="accordion-body"><div class="task-list" id="tl-bg-acting"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-acting')"></div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="tab-panel" id="panel-home">
+    <div class="task-list" id="tl-home"></div>
+    <input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-home')">
+  </div>
+</div>
+
+<div class="divider fade fade-5"></div>
+
+<!-- TOMORROW'S THREE -->
+<div class="card fade fade-4">
+  <div class="focus-title">tomorrow's three</div>
+  <div class="focus-sub">end of day prep — set before you close out</div>
+  <div class="focus-items">
+    <div class="focus-item"><div class="focus-num">1</div><input class="focus-input" id="tmrw-1" placeholder="first thing tomorrow…"><div class="focus-check" onclick="toggleFocus(this)"></div></div>
+    <div class="focus-item"><div class="focus-num">2</div><input class="focus-input" id="tmrw-2" placeholder="second priority…"><div class="focus-check" onclick="toggleFocus(this)"></div></div>
+    <div class="focus-item"><div class="focus-num">3</div><input class="focus-input" id="tmrw-3" placeholder="and one more…"><div class="focus-check" onclick="toggleFocus(this)"></div></div>
+  </div>
+</div>
+
+<!-- END OF DAY -->
+<div class="card fade fade-6">
+  <div class="section-label" style="margin-bottom:0.75rem">
+    <span class="label-dot" style="background:var(--plum-text)"></span>end of day
+  </div>
+  <div class="learn-prompt">what did i learn today?</div>
+  <textarea class="eod-area" id="eodLearn" placeholder="write it down…"></textarea>
+  <div class="learn-prompt" style="margin-top:0.5rem;">how am i landing?</div>
+  <div class="mood-tags" id="moodTags">
+    <div class="mood-tag" onclick="toggleMood(this)">grounded</div>
+    <div class="mood-tag" onclick="toggleMood(this)">drained</div>
+    <div class="mood-tag" onclick="toggleMood(this)">proud</div>
+    <div class="mood-tag" onclick="toggleMood(this)">scattered</div>
+    <div class="mood-tag" onclick="toggleMood(this)">clear</div>
+    <div class="mood-tag" onclick="toggleMood(this)">overwhelmed</div>
+    <div class="mood-tag" onclick="toggleMood(this)">creative</div>
+    <div class="mood-tag" onclick="toggleMood(this)">heavy</div>
+    <div class="mood-tag" onclick="toggleMood(this)">light</div>
+  </div>
+  <div class="learn-prompt" style="margin-top:1rem;">tomorrow's prompt</div>
+  <div class="orbit-prompt" id="eodPrompt"></div>
+  <textarea class="eod-area" id="eodReflect" placeholder="sit with it…"></textarea>
+  <div class="clear-row">
+    <button class="clear-btn" onclick="clearDay()">clear the day</button>
+    <button class="clear-btn" onclick="clearWeek()">clear the week</button>
+  </div>
+</div>
+
+<!-- QUICK LINKS -->
+<div class="section-label fade fade-6" style="margin-bottom:0.6rem">
+  <span class="label-dot" style="background:var(--faint)"></span>open in
+</div>
+<div class="links fade fade-6">
+  <a class="link-btn" href="https://notion.so" target="_blank">Notion</a>
+  <a class="link-btn" href="https://app.asana.com" target="_blank">Asana</a>
+  <a class="link-btn" href="https://calendar.google.com" target="_blank">Calendar</a>
+</div>
+
+<script>
+// ── ORBIT DATA ────────────────────────────────────────────────
+const orbit = [
+  { day:'Sunday',    num:1, mantra:"let's start fresh.",      prompt:'how can i start over today?' },
+  { day:'Monday',    num:2, mantra:'go with the flow.',       prompt:'how can i gently lean in today?' },
+  { day:'Tuesday',   num:3, mantra:'do the hard thing.',      prompt:'what work feels heavy today?' },
+  { day:'Wednesday', num:4, mantra:'check in.',               prompt:'am i on track this week?' },
+  { day:'Thursday',  num:5, mantra:'expand, study, & dream.', prompt:'what have i learned this week?' },
+  { day:'Friday',    num:6, mantra:'bask in the glow.',       prompt:'how can i enjoy today?' },
+  { day:'Saturday',  num:7, mantra:'tighten up.',             prompt:'where will i invest my energy today?' }
+];
+
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const realNow = new Date();
+const realDayIdx = realNow.getDay();
+
+let viewedDayIdx = realDayIdx;
+
+// ── STORAGE ──────────────────────────────────────────────────
+const S = {
+  get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set: (k,v) => localStorage.setItem(k, JSON.stringify(v)),
+  del: k => localStorage.removeItem(k)
+};
+
+// ── DAY NAVIGATION ───────────────────────────────────────────
+function buildPips() {
+  const container = document.getElementById('dayPips');
+  container.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'day-pip' + (i === realDayIdx ? ' today' : '') + (i === viewedDayIdx ? ' active' : '');
+    pip.textContent = i + 1;
+    pip.title = orbit[i].day;
+    pip.onclick = () => { viewedDayIdx = i; updateHeader(); };
+    container.appendChild(pip);
+  }
+  const indicator = document.getElementById('todayIndicator');
+  indicator.textContent = viewedDayIdx === realDayIdx ? '' : `viewing ${orbit[viewedDayIdx].day}`;
+}
+
+function shiftDay(dir) {
+  viewedDayIdx = (viewedDayIdx + dir + 7) % 7;
+  updateHeader();
+}
+
+function updateHeader() {
+  const d = orbit[viewedDayIdx];
+  const h = realNow.getHours();
+  const isToday = viewedDayIdx === realDayIdx;
+
+  document.getElementById('orbitDay').textContent = `${d.day} | ${d.num} — the daily orbit`;
+
+  if (isToday) {
+    document.getElementById('dateLine').textContent = `${months[realNow.getMonth()]} ${realNow.getDate()}, ${realNow.getFullYear()}`;
+    document.getElementById('mantraLine').textContent = `${h < 12 ? 'good morning' : h < 17 ? 'good afternoon' : 'good evening'}, guava. ${d.mantra}`;
+  } else {
+    document.getElementById('dateLine').textContent = d.day;
+    document.getElementById('mantraLine').textContent = d.mantra;
+  }
+
+  const tomorrowIdx = (viewedDayIdx + 1) % 7;
+  const tomorrow = orbit[tomorrowIdx];
+  document.getElementById('eodPrompt').textContent = `"${tomorrow.prompt}"`;
+  document.getElementById('morningPrompt').textContent = `"${d.prompt}"`;
+  buildPips();
+  if (typeof renderEnergy === 'function') renderEnergy();
+}
+
+// ── ENERGY ───────────────────────────────────────────────────
+const energyNotes = ['','low — be gentle today','low-medium — take breaks','medium — steady on','medium-high — you\'ve got this','full — use it well'];
+// Energy stored per date — keeps full current week for reflection
+const todayStr = new Date().toDateString();
+// Get the start of the current week (Sunday)
+const weekStart = new Date();
+weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+weekStart.setHours(0,0,0,0);
+let energyHistory = S.get('energyHistory') || {};
+// clean up anything older than this week's Sunday
+Object.keys(energyHistory).forEach(k => {
+  if (new Date(k) < weekStart) delete energyHistory[k];
+});
+S.set('energyHistory', energyHistory);
+let energyLevel = energyHistory[todayStr] || 0;
+
+function renderEnergy() {
+  const isToday = viewedDayIdx === realDayIdx;
+  const viewedDate = new Date();
+  const diff = viewedDayIdx - realDayIdx;
+  viewedDate.setDate(viewedDate.getDate() + diff);
+  viewedDate.setHours(0,0,0,0);
+  const todayMidnight = new Date();
+  todayMidnight.setHours(0,0,0,0);
+  const viewedDateStr = viewedDate.toDateString();
+  const isFuture = viewedDate > todayMidnight;
+  let displayLevel = 0;
+  let noteText = 'tap to log';
+  if (isToday) {
+    displayLevel = energyLevel;
+    noteText = energyLevel ? energyNotes[energyLevel] : 'tap to log';
+  } else if (!isFuture && energyHistory[viewedDateStr]) {
+    displayLevel = energyHistory[viewedDateStr];
+    noteText = energyNotes[displayLevel] + ' (' + orbit[viewedDayIdx].day.toLowerCase() + ')';
+  } else if (isFuture) {
+    noteText = 'not yet logged';
+  }
+  document.querySelectorAll('.dot').forEach((d,i) => {
+    d.className = 'dot';
+    if (i < displayLevel) {
+      if (i < 2) d.classList.add('lit-low');
+      else if (i < 4) d.classList.add('lit-mid');
+      else d.classList.add('lit-high');
+    }
+  });
+  document.getElementById('energyNote').textContent = noteText;
+}
+
+document.getElementById('energyDots').addEventListener('click', e => {
+  if (!e.target.classList.contains('dot')) return;
+  energyLevel = parseInt(e.target.dataset.level);
+  energyHistory[todayStr] = energyLevel;
+  S.set('energyHistory', energyHistory);
+  renderEnergy();
+});
+
+updateHeader();
+
+// ── INTENTION ────────────────────────────────────────────────
+const intentionEl = document.getElementById('weeklyIntention');
+intentionEl.value = S.get('intention') || '';
+intentionEl.addEventListener('input', () => S.set('intention', intentionEl.value));
+
+// ── UPCOMING ─────────────────────────────────────────────────
+const typeCycle = { meeting:'trip', trip:'other', other:'meeting' };
+let upcoming = S.get('upcoming') || [
+  { type:'meeting', text:'', pinned:false },
+  { type:'trip', text:'', pinned:false },
+  { type:'meeting', text:'', pinned:false }
+];
+
+function saveUpcoming() { S.set('upcoming', upcoming); }
+
+function renderUpcoming() {
+  const list = document.getElementById('upcomingList');
+  list.innerHTML = '';
+  upcoming.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'upcoming-item';
+    if (item.pinned) row.style.borderLeft = '2px solid var(--gold)';
+
+    const typeBtn = document.createElement('button');
+    typeBtn.className = `type-btn type-${item.type}`;
+    typeBtn.textContent = item.type;
+    typeBtn.onclick = () => { upcoming[i].type = typeCycle[upcoming[i].type]; saveUpcoming(); renderUpcoming(); };
+
+    const input = document.createElement('input');
+    input.className = 'upcoming-text';
+    input.placeholder = 'add details…';
+    input.value = item.text;
+    input.oninput = () => { upcoming[i].text = input.value; saveUpcoming(); };
+
+    const pinBtn = document.createElement('button');
+    pinBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:11px;padding:0 3px;opacity:' + (item.pinned ? '1' : '0.3') + ';flex-shrink:0;';
+    pinBtn.textContent = '📌';
+    pinBtn.title = item.pinned ? 'pinned — survives clear the day' : 'tap to pin';
+    pinBtn.onclick = () => { upcoming[i].pinned = !upcoming[i].pinned; saveUpcoming(); renderUpcoming(); };
+
+    const del = document.createElement('button');
+    del.className = 'del-btn';
+    del.innerHTML = '×';
+    del.onclick = () => { upcoming.splice(i,1); saveUpcoming(); renderUpcoming(); };
+
+    row.appendChild(typeBtn); row.appendChild(input); row.appendChild(pinBtn); row.appendChild(del);
+    list.appendChild(row);
+  });
+}
+
+function addUpcoming() {
+  upcoming.push({ type:'meeting', text:'', pinned:false });
+  saveUpcoming(); renderUpcoming();
+}
+
+renderUpcoming();
+
+// ── SPRINT ────────────────────────────────────────────────────
+const defaultSprint = [
+  { text:'laelia launch v4', status:'active' },
+  { text:'baaaad.fm — abril 2026', status:'active' },
+  { text:'baaaad.fm — mayo 2026', status:'next' }
+];
+
+let sprintItems = S.get('sprint') || defaultSprint;
+let sprintEditMode = false;
+const statusCycle = { active:'next', next:'done', done:'active' };
+const statusLabels = { active:'active', next:'next', done:'done ✓' };
+const statusClasses = { active:'status-active', next:'status-next', done:'status-done' };
+
+function saveSprint() { S.set('sprint', sprintItems); }
+
+function renderSprint() {
+  const container = document.getElementById('sprintItems');
+  container.innerHTML = '';
+  sprintItems.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'sprint-item';
+
+    const input = document.createElement('input');
+    input.className = 'sprint-item-text';
+    input.value = item.text;
+    input.readOnly = !sprintEditMode;
+    input.oninput = () => { sprintItems[i].text = input.value; saveSprint(); };
+
+    const statusBtn = document.createElement('button');
+    statusBtn.className = `sprint-status-btn ${statusClasses[item.status]}`;
+    statusBtn.textContent = statusLabels[item.status];
+    if (sprintEditMode) {
+      statusBtn.onclick = () => { sprintItems[i].status = statusCycle[item.status]; saveSprint(); renderSprint(); };
+    } else {
+      statusBtn.style.cursor = 'default';
+    }
+
+    const del = document.createElement('button');
+    del.className = 'del-btn';
+    del.innerHTML = '×';
+    del.style.display = sprintEditMode ? 'block' : 'none';
+    del.onclick = () => { sprintItems.splice(i,1); saveSprint(); renderSprint(); };
+
+    row.appendChild(input); row.appendChild(statusBtn); row.appendChild(del);
+    container.appendChild(row);
+  });
+
+  document.getElementById('sprintAddRow').style.display = sprintEditMode ? 'block' : 'none';
+  document.getElementById('sprintEditBtn').textContent = sprintEditMode ? 'done' : 'edit';
+}
+
+function toggleSprintEdit() {
+  sprintEditMode = !sprintEditMode;
+  renderSprint();
+}
+
+function addSprintItem(e) {
+  if (e.key !== 'Enter') return;
+  const val = e.target.value.trim();
+  if (!val) return;
+  sprintItems.push({ text: val, status: 'next' });
+  saveSprint(); renderSprint();
+  e.target.value = '';
+}
+
+renderSprint();
+
+// ── MONTHLY FIRE ─────────────────────────────────────────────
+const defaultMonthlyFire = [
+  { name:'marzo 2026 — high art rap', status:'done' },
+  { name:'abril 2026 — rap stars', status:'active' },
+  { name:'mayo 2026 — melodic madness 4.0', status:'next' },
+  { name:'junio 2026 — soulful dance', status:'next' }
+];
+
+let monthlyFire = S.get('monthlyFire') || defaultMonthlyFire;
+let fireEditMode = false;
+const fireStatusCycle = { done:'active', active:'next', next:'done' };
+const fireBadgeClass = { active:'badge-active', next:'badge-next', done:'badge-done' };
+const fireBadgeLabel = { active:'in progress', next:'next', done:'done ✓' };
+
+function saveMonthlyFire() { S.set('monthlyFire', monthlyFire); }
+
+function renderMonthlyFire() {
+  const list = document.getElementById('monthlyFireList');
+  list.innerHTML = '';
+  monthlyFire.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'month-status';
+
+    const input = document.createElement('input');
+    input.className = 'month-name-input';
+    input.value = item.name;
+    input.readOnly = !fireEditMode;
+    input.oninput = () => { monthlyFire[i].name = input.value; saveMonthlyFire(); };
+
+    const badge = document.createElement('span');
+    badge.className = `month-badge ${fireBadgeClass[item.status]}`;
+    badge.textContent = fireBadgeLabel[item.status];
+    badge.style.cursor = fireEditMode ? 'pointer' : 'default';
+    if (fireEditMode) {
+      badge.onclick = () => { monthlyFire[i].status = fireStatusCycle[item.status]; saveMonthlyFire(); renderMonthlyFire(); };
+    }
+
+    const del = document.createElement('button');
+    del.className = 'del-btn';
+    del.innerHTML = '×';
+    del.style.display = fireEditMode ? 'block' : 'none';
+    del.style.color = 'var(--faint)';
+    del.onclick = () => { monthlyFire.splice(i,1); saveMonthlyFire(); renderMonthlyFire(); };
+
+    row.appendChild(input); row.appendChild(badge); row.appendChild(del);
+    list.appendChild(row);
+  });
+
+  document.getElementById('monthlyFireEditRow').style.display = fireEditMode ? 'block' : 'none';
+}
+
+// Hook monthly fire edit to its accordion header
+document.querySelector('#panel-baaaad .accordion-header').addEventListener('dblclick', () => {
+  fireEditMode = !fireEditMode;
+  renderMonthlyFire();
+});
+
+function addMonthlyFire(e) {
+  if (e.key !== 'Enter') return;
+  const val = e.target.value.trim();
+  if (!val) return;
+  monthlyFire.push({ name: val, status: 'next' });
+  saveMonthlyFire(); renderMonthlyFire();
+  e.target.value = '';
+}
+
+renderMonthlyFire();
+
+// ── FOCUS ITEMS ───────────────────────────────────────────────
+// Daily fields use date-keyed storage (same pattern as energy)
+// — no separate dailyDate check needed, yesterday's keys simply don't exist today
+
+// On a new day: carry tmrw-1/2/3 into today-1/2/3, then clear tmrw
+const prevTodayKey = 'today-keys-date';
+const lastTodayDate = S.get(prevTodayKey);
+if (lastTodayDate && lastTodayDate !== todayStr) {
+  // new day — carry tomorrow's three into today's date-keyed slots
+  ['today-1','today-2','today-3'].forEach((id, i) => {
+    const val = S.get('tmrw-' + (i+1)) || '';
+    S.set(id + '-' + todayStr, val);
+  });
+  // clear tomorrow's three
+  ['tmrw-1','tmrw-2','tmrw-3'].forEach(k => S.del(k));
+  // clear unpinned upcoming
+  const cu = S.get('upcoming') || [];
+  const pinned = cu.filter(u => u.pinned);
+  S.set('upcoming', pinned.length ? pinned : [
+    { type:'meeting', text:'', pinned:false },
+    { type:'trip', text:'', pinned:false },
+    { type:'meeting', text:'', pinned:false }
+  ]);
+}
+S.set(prevTodayKey, todayStr);
+
+// Load today's three using date-keyed storage
+['today-1','today-2','today-3'].forEach(id => {
+  const el = document.getElementById(id);
+  const key = id + '-' + todayStr;
+  el.value = S.get(key) || '';
+  el.addEventListener('input', () => S.set(key, el.value));
+});
+
+// Tomorrow's three — no date key, carry over by design
+['tmrw-1','tmrw-2','tmrw-3'].forEach(id => {
+  const el = document.getElementById(id);
+  el.value = S.get(id) || '';
+  el.addEventListener('input', () => S.set(id, el.value));
+});
+
+// Focus checks — date-keyed
+const focusKey = 'focusChecks-' + todayStr;
+const savedChecks = S.get(focusKey) || {};
+document.querySelectorAll('.focus-item').forEach((item,i) => {
+  if (savedChecks[i]) item.classList.add('done');
+});
+
+function toggleFocus(checkEl) {
+  const item = checkEl.parentElement;
+  item.classList.toggle('done');
+  const checks = {};
+  document.querySelectorAll('.focus-item').forEach((it,idx) => {
+    if (it.classList.contains('done')) checks[idx] = true;
+  });
+  S.set(focusKey, checks);
+}
+
+// ── TABS ─────────────────────────────────────────────────────
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+// ── ACCORDION ────────────────────────────────────────────────
+function toggleAcc(header) { header.parentElement.classList.toggle('open'); }
+
+// ── TASKS ────────────────────────────────────────────────────
+const defaultTasks = {
+  'tl-botanica': ['botanica page — copywriting','botanica offerings — finalize'],
+  'tl-expand': ['expand page — copywriting (blocked: offerings list)'],
+  'tl-awaken': ['awaken page — copywriting','laeliazine — types of newsletters + frequency','laeliazine — write practice energy forecast','laeliazine — pitch deck','laeliazine — contribution form','chakra writeups (7) — cross: botanica + baaaad.fm'],
+  'tl-learn': ['learn page — copywriting','reiki I curriculum','reiki II curriculum','reiki master curriculum'],
+  'tl-sd': ['draft business plans','transcribe research notebooks (storage trip first)','fill out content strategy document','transcribe female nervous system webinar notes'],
+  'tl-cs': ['become a client page — expand outline','client success page — copywriting'],
+  'tl-events': ['Blonde listening party','book event research','Serato computer library (pending budget)'],
+  'tl-ops': ['opportunities page — copywriting','privacy policy','terms & conditions','LLC renewal','group chat updates + intro (pre-launch)'],
+  'tl-funding': ['investor deck','sponsors deck','edit/add to intro deck','find people to pitch','create yearly budget spreadsheet'],
+  'tl-design': ['chakra infographic design (7 graphics)','create sphere logos // informative graphics','create event poster template','create offerings graphic template','business cards','branded invoice template'],
+  'tl-writeups': ['abril 2026 writeup','chakra playlist project writeup (7)','memoirs of a crash out writeup'],
+  'tl-chakra': ['cover art — 7 graphics (chakra colors, baaaad.fm template)','practice energy forecast reading (cross: tarot/oracle)'],
+  'tl-editorial': ['re-introduce the blog'],
+  'tl-bg-ops': ['camera roll deep organization','rewrite artist bios','create a portfolio in Notion','five year plan','bookmarked articles/vids','organize & read saved posts across socials','vocabulary project','finish poetry journal'],
+  'tl-bg-videos': ['imperfection in characters & stories pt. 1 (Gossip Girl)','imperfection in characters & stories pt. 2 (The Little Prince)','imperfection in characters & stories pt. 3 (Wicked)','Michigan trip','MSI recap'],
+  'tl-bg-photos': ['post bodysuit photoshoot','post NYC throwback (2019)','new photoshoot','Michigan trip photos'],
+  'tl-bg-music': ['princesa speaking budget spreadsheet','record voice memo demos','msg Classick'],
+  'tl-bg-photo': ['organize photography folders','Chairs','Faces','Stark//scapes'],
+  'tl-bg-art': ['explore print website for wholesale','order samples','decide on paper','create a wholesale shop','choose pieces to sell in bulk'],
+  'tl-bg-solo': ['finish photography projects','choose highlight photos','find a venue/collaborator','name the show','write necessary copy'],
+  'tl-bg-books': ['Lighters, men, & other things i left behind','365','YA series','Untitled novel','The trenches: ghost stories from...'],
+  'tl-bg-tvfilm': ['Wanted (film)','Barrios (TV pilot)'],
+  'tl-bg-substack': ['write post from drafted ideas'],
+  'tl-bg-acting': ['prepare audition (headshot · resume · monologue book)'],
+  'tl-home': ['find a psychiatrist','pap smear','dentist','storage trip','notarize $$ forms','seasonings project']
+};
+
+function makeTask(listId, text, done) {
+  const row = document.createElement('div');
+  row.className = 'task' + (done ? ' done' : '');
+
+  const cb = document.createElement('div');
+  cb.className = 'task-checkbox';
+  cb.onclick = () => { row.classList.toggle('done'); saveTasks(listId); };
+
+  const input = document.createElement('input');
+  input.className = 'task-name';
+  input.value = text;
+  input.oninput = () => saveTasks(listId);
+  input.onclick = e => e.stopPropagation();
+
+  const del = document.createElement('button');
+  del.className = 'task-del';
+  del.innerHTML = '×';
+  del.onclick = e => { e.stopPropagation(); row.remove(); saveTasks(listId); };
+
+  row.appendChild(cb); row.appendChild(input); row.appendChild(del);
+  return row;
+}
+
+function saveTasks(listId) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  const tasks = Array.from(list.querySelectorAll('.task')).map(t => ({
+    text: t.querySelector('.task-name').value,
+    done: t.classList.contains('done')
+  }));
+  S.set(listId, tasks);
+}
+
+function loadTasks(listId) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  const saved = S.get(listId);
+  const tasks = saved || (defaultTasks[listId] || []).map(t => ({ text:t, done:false }));
+  tasks.forEach(t => list.appendChild(makeTask(listId, t.text, t.done)));
+}
+
+function addTask(e, listId) {
+  if (e.key !== 'Enter') return;
+  const val = e.target.value.trim();
+  if (!val) return;
+  const list = document.getElementById(listId);
+  list.appendChild(makeTask(listId, val, false));
+  saveTasks(listId);
+  e.target.value = '';
+}
+
+Object.keys(defaultTasks).forEach(loadTasks);
+
+// ── BRAIN DUMP ────────────────────────────────────────────────
+const brainKey = 'brainDump-' + todayStr;
+const brainEl = document.getElementById('brainDump');
+brainEl.value = S.get(brainKey) || '';
+brainEl.addEventListener('input', () => S.set(brainKey, brainEl.value));
+
+// ── EOD ───────────────────────────────────────────────────────
+const eodReflectKey = 'eodReflect-' + todayStr;
+const eodLearnKey = 'eodLearn-' + todayStr;
+const morningKey = 'morningReflect-' + todayStr;
+
+const eodReflectEl = document.getElementById('eodReflect');
+const eodLearnEl = document.getElementById('eodLearn');
+const morningReflectEl = document.getElementById('morningReflect');
+
+eodReflectEl.value = S.get(eodReflectKey) || '';
+eodLearnEl.value = S.get(eodLearnKey) || '';
+morningReflectEl.value = S.get(morningKey) || '';
+
+eodReflectEl.addEventListener('input', () => S.set(eodReflectKey, eodReflectEl.value));
+eodLearnEl.addEventListener('input', () => S.set(eodLearnKey, eodLearnEl.value));
+morningReflectEl.addEventListener('input', () => S.set(morningKey, morningReflectEl.value));
+
+// Mood tags — date-keyed storage, resets automatically each new day
+const moodKey = 'moods-' + todayStr;
+const savedMoods = S.get(moodKey) || [];
+document.querySelectorAll('.mood-tag').forEach(tag => {
+  tag.classList.remove('selected');
+  if (savedMoods.includes(tag.textContent)) tag.classList.add('selected');
+});
+
+function toggleMood(el) {
+  el.classList.toggle('selected');
+  S.set(moodKey, Array.from(document.querySelectorAll('.mood-tag.selected')).map(t => t.textContent));
+}
+
+// ── CLEAR ─────────────────────────────────────────────────────
+function clearDay() {
+  if (!confirm('Clear today\'s entries? Resets today\'s three, morning reflection, brain dump, EOD, energy, mood tags, and unpinned meetings. Tasks and intention stay.')) return;
+  // clear all date-keyed daily fields for today
+  ['today-1','today-2','today-3'].forEach(id => S.del(id + '-' + todayStr));
+  S.del('eodReflect-' + todayStr);
+  S.del('eodLearn-' + todayStr);
+  S.del('brainDump-' + todayStr);
+  S.del('morningReflect-' + todayStr);
+  S.del('focusChecks-' + todayStr);
+  S.del('moods-' + todayStr);
+  // clear element values
+  ['eodReflect','eodLearn','brainDump','morningReflect','today-1','today-2','today-3'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  // clear only unpinned upcoming
+  upcoming = upcoming.filter(u => u.pinned);
+  if (!upcoming.length) upcoming = [
+    { type:'meeting', text:'', pinned:false },
+    { type:'trip', text:'', pinned:false },
+    { type:'meeting', text:'', pinned:false }
+  ];
+  S.set('upcoming', upcoming);
+  renderUpcoming();
+  // reset energy for today
+  energyLevel = 0;
+  energyHistory[todayStr] = 0;
+  S.set('energyHistory', energyHistory);
+  document.querySelectorAll('.focus-item').forEach(i => i.classList.remove('done'));
+  document.querySelectorAll('.mood-tag').forEach(t => t.classList.remove('selected'));
+  renderEnergy();
+}
+
+function clearWeek() {
+  if (!confirm('Clear the full week? This resets everything including all tasks, intention, sprint, and tomorrow\'s three. Task lists will reload from defaults.')) return;
+  localStorage.clear();
+  location.reload();
+}
+</script>
+</body>
+</html>
