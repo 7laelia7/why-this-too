@@ -931,7 +931,9 @@ document.getElementById('energyDots').addEventListener('click', e => {
   renderEnergy();
 });
 
-updateHeader();
+// updateHeader() is called at the END of the script, after all let/const
+// initialization, to avoid temporal dead zone errors when it invokes
+// renderUpcoming/renderDailyFields (which reference `upcoming`, etc.)
 
 // ── INTENTION ────────────────────────────────────────────────
 const intentionEl = document.getElementById('weeklyIntention');
@@ -1433,6 +1435,11 @@ function clearWeek() {
   localStorage.clear();
   location.reload();
 }
+
+// Finally, populate the header. This must run AFTER all let/const init above
+// so that renderUpcoming/renderDailyFields (called from inside updateHeader)
+// don't hit temporal dead zone errors on `upcoming`, etc.
+updateHeader();
 </script>
 </body>
 </html>
