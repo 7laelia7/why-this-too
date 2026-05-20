@@ -258,6 +258,31 @@
     letter-spacing: 0.06em; display: block; transition: color 0.2s;
   }
   .add-upcoming-btn:hover { color: var(--text); }
+  
+  /* ── MORNING ROUTINE ── */
+  .routine-card {
+    background: var(--blue-dim);
+    border: 1px solid #2a4060;
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.25rem;
+  }
+  .routine-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .routine-edit-btn {
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: none; border: 1px solid #2a4060;
+    color: var(--blue-text); border-radius: 10px;
+    padding: 2px 8px; cursor: pointer; transition: all 0.2s;
+  }
+  .routine-edit-btn:hover { border-color: var(--blue-text); }
+  
+  .routine-note {
+    font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.85rem; color: var(--blue-text); margin-bottom: 0.75rem; line-height: 1.4;
+  }
 
   /* ── SPRINT ── */
   .sprint-card {
@@ -541,6 +566,22 @@
 <div class="intention-card fade fade-2">
   <div class="intention-label">weekly intention</div>
   <input class="editable-field" id="weeklyIntention" placeholder="set your intention for the week…">
+</div>
+
+<!-- MORNING ROUTINE -->
+<div class="routine-card fade fade-2">
+  <div class="routine-header">
+    <div class="section-label" style="margin-bottom:0">
+      <span class="label-dot" style="background:var(--blue-text)"></span>
+      morning routine
+    </div>
+    <button class="routine-edit-btn" id="routineEditBtn" onclick="toggleRoutineEdit()">edit</button>
+  </div>
+  <div class="routine-note">order is flexible on off days.<br>recommended the evening before a work day.</div>
+  <div class="task-list" id="routineItems"></div>
+  <div id="routineAddRow" style="display:none; margin-bottom:0.5rem;">
+    <input class="add-task" id="routineAddInput" placeholder="+ add routine item (enter)" onkeydown="addRoutineItem(event)">
+  </div>
 </div>
 
 <!-- MORNING REFLECTION -->
@@ -946,6 +987,107 @@ document.getElementById('energyDots').addEventListener('click', e => {
 const intentionEl = document.getElementById('weeklyIntention');
 intentionEl.value = S.get('intention') || '';
 intentionEl.addEventListener('input', () => S.set('intention', intentionEl.value));
+
+// ── MORNING ROUTINE ──────────────────────────────────────────
+const defaultRoutine = [
+  { text:'self care checklist', done:false },
+  { text:'planner', done:false },
+  { text:'the daily orbit', done:false },
+  { text:'board of directors check-in', done:false },
+  { text:'Asana check-in', done:false }
+];
+
+let routineEditMode = false;
+
+function loadRoutine() {
+  const container = document.getElementById('routineItems');
+  container.innerHTML = '';
+  // use date-keyed storage for the checkboxes, just like the focus items
+  const d = getViewedDateStr();
+  const savedChecks = S.get('routineChecks-' + d) || {};
+  // get the actual list items (which are persistent, not date keyed)
+  let routineItems = S.get('routineItems');
+  if (!Array.isArray(routineItems) || routineItems.length === 0) routineItems = defaultRoutine.map(t => ({text: t.text}));
+
+  routineItems.forEach((item, i) => {
+    const row = document.createElement('div');
+    const isDone = !!savedChecks[i];
+    row.className = 'task' + (isDone ? ' done' : '');
+
+    const cb = document.createElement('div');
+    cb.className = 'task-checkbox';
+    // Disable clicking the checkbox if not viewing today AND not in edit mode
+    if (viewedDayIdx === new Date().getDay() || routineEditMode) {
+      cb.onclick = () => { 
+        if (viewedDayIdx !== new Date().getDay()) return; // only save checks for today
+        row.classList.toggle('done'); 
+        const currentChecks = S.get('routineChecks-' + todayStr) || {};
+        currentChecks[i] = row.classList.contains('done');
+        S.set('routineChecks-' + todayStr, currentChecks);
+      };
+    } else {
+        cb.style.opacity = '0.5';
+        cb.style.cursor = 'default';
+    }
+
+    const input = document.createElement('input');
+    input.className = 'task-name';
+    input.value = item.text;
+    input.readOnly = !routineEditMode;
+    if (routineEditMode) {
+        input.oninput = () => { 
+            routineItems[i].text = input.value; 
+            S.set('routineItems', routineItems); 
+        };
+    }
+    input.onclick = e => e.stopPropagation();
+
+    const del = document.createElement('button');
+    del.className = 'task-del';
+    del.innerHTML = '×';
+    del.style.display = routineEditMode ? 'block' : 'none';
+    del.onclick = e => { 
+        e.stopPropagation(); 
+        routineItems.splice(i,1); 
+        S.set('routineItems', routineItems); 
+        
+        // Also clean up the check state for the deleted item
+        const currentChecks = S.get('routineChecks-' + todayStr) || {};
+        const newChecks = {};
+        // Shift checks down
+        for(let j=0; j < routineItems.length; j++) {
+            if(j < i) newChecks[j] = currentChecks[j];
+            if(j >= i) newChecks[j] = currentChecks[j+1];
+        }
+        S.set('routineChecks-' + todayStr, newChecks);
+
+        loadRoutine(); 
+    };
+
+    row.appendChild(cb); row.appendChild(input); row.appendChild(del);
+    container.appendChild(row);
+  });
+  
+  document.getElementById('routineAddRow').style.display = routineEditMode ? 'block' : 'none';
+  document.getElementById('routineEditBtn').textContent = routineEditMode ? 'done' : 'edit';
+}
+
+function toggleRoutineEdit() {
+  routineEditMode = !routineEditMode;
+  loadRoutine();
+}
+
+function addRoutineItem(e) {
+  if (e.key !== 'Enter') return;
+  const val = e.target.value.trim();
+  if (!val) return;
+  let routineItems = S.get('routineItems');
+  if (!Array.isArray(routineItems)) routineItems = defaultRoutine.map(t => ({text: t.text}));
+  routineItems.push({ text: val });
+  S.set('routineItems', routineItems); 
+  loadRoutine();
+  e.target.value = '';
+}
 
 // ── UPCOMING ─────────────────────────────────────────────────
 const typeCycle = { meeting:'trip', trip:'other', other:'meeting' };
@@ -1402,6 +1544,9 @@ function renderDailyFields() {
     tag.classList.toggle('selected', savedMoods.includes(tag.textContent));
   });
 
+  // Load the routine to update checkbox states for the viewed day
+  loadRoutine();
+
   // visual dim when viewing past/future
   document.body.classList.toggle('viewing-other-day', !isToday);
 }
@@ -1428,7 +1573,7 @@ document.addEventListener('visibilitychange', () => {
 
 // ── CLEAR ─────────────────────────────────────────────────────
 function clearDay() {
-  if (!confirm('Clear today\'s entries? Resets today\'s three, morning reflection, brain dump, EOD, energy, mood tags, and unpinned meetings. Tasks and intention stay.')) return;
+  if (!confirm('Clear today\'s entries? Resets today\'s three, morning routine checks, morning reflection, brain dump, EOD, energy, mood tags, and unpinned meetings. Tasks and intention stay.')) return;
   if (viewedDayIdx !== new Date().getDay()) {
     alert('switch back to today before clearing.');
     return;
@@ -1441,6 +1586,7 @@ function clearDay() {
   S.del('morningReflect-' + todayStr);
   S.del('focusChecks-' + todayStr);
   S.del('moods-' + todayStr);
+  S.del('routineChecks-' + todayStr);
   // clear only unpinned upcoming
   upcoming = upcoming.filter(u => u.pinned);
   if (!upcoming.length) upcoming = [
@@ -1460,7 +1606,7 @@ function clearDay() {
 }
 
 function clearWeek() {
-  if (!confirm('Clear the full week? This resets daily items like morning reflection, brain dump, EOD, energy, and mood tags for the whole week. Task lists, Current Sprint, and Intention stay.')) return;
+  if (!confirm('Clear the full week? This resets daily items like morning reflection, brain dump, EOD, energy, and mood tags for the whole week. Task lists, Current Sprint, Morning Routine items, and Intention stay.')) return;
   
   // Define what NOT to clear
   const keepKeys = [
@@ -1468,6 +1614,7 @@ function clearWeek() {
     'sprint',
     'monthlyFire',
     'upcoming',
+    'routineItems', // Keep the actual items in the morning routine list
     // And all your tabbed task lists
     'tl-botanica', 'tl-expand', 'tl-awaken', 'tl-learn', 'tl-sd', 'tl-cs', 'tl-events', 'tl-ops', 'tl-funding', 'tl-design',
     'tl-writeups', 'tl-chakra', 'tl-editorial',
