@@ -1323,12 +1323,44 @@ function loadMonthlyOrbit() {
   let m = S.get('monthlyOrbit');
   if (!m || !Array.isArray(m.weeks)) m = JSON.parse(JSON.stringify(defaultMonthlyOrbit));
   if (!Array.isArray(m.trackers)) m.trackers = JSON.parse(JSON.stringify(defaultMonthlyOrbit.trackers));
+
+  // Auto-reset trackers when their period boundary crosses
+  let changed = false;
+  m.trackers.forEach(t => {
+    if (!t.period) return;
+    const currentKey = getPeriodKey(t.period);
+    if (!currentKey) return;
+    if (!t.lastResetKey) {
+      t.lastResetKey = currentKey;
+      changed = true;
+    } else if (t.lastResetKey !== currentKey) {
+      t.current = 0;
+      t.lastResetKey = currentKey;
+      changed = true;
+    }
+  });
+  if (changed) S.set('monthlyOrbit', m);
+
   return m;
 }
 function saveMonthlyOrbit(m) { S.set('monthlyOrbit', m); }
 
 function monthKey() { return `${viewedYear}-${String(viewedMonth+1).padStart(2,'0')}`; }
 function isViewedMonthReal() { return viewedYear === realNow.getFullYear() && viewedMonth === realNow.getMonth(); }
+
+function getPeriodKey(period) {
+  const now = new Date();
+  if (period === 'yr') return String(now.getFullYear());
+  if (period === 'mo') return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  if (period === 'wk') {
+    const sun = new Date(now);
+    sun.setDate(now.getDate() - now.getDay());
+    sun.setHours(0,0,0,0);
+    return sun.toISOString().slice(0,10);
+  }
+  if (period === 'day') return now.toDateString();
+  return null;
+}
 
 function getWeekForDay(day) {
   if (day <= 6) return 1;
