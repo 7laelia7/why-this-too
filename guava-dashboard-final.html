@@ -1304,6 +1304,9 @@ const defaultMonthlyOrbit = {
           { id: 'w4-p4', text: 'post across all socials',                          due: { type:'eom' } },
           { id: 'w4-p5', text: 'mirror next month\'s playlist',                          due: { type:'eom' } }
         ]},
+        { name: 'baaaad.fm promo retrospective', tasks: [
+          { id: 'w4-r1', text: 'promote last month\'s write up', due: { type:'weekday', value:'fri', skipIfDayAtLeast: 27 } }
+        ]},
         { name: 'educational commitments', tasks: [
           { id: 'w4-l1', text: 'coursework session', due: { type:'fluid' } },
           { id: 'w4-l2', text: 'reading session',    due: { type:'fluid' } }
@@ -1356,6 +1359,9 @@ function resolveDueDates(due, year, month, weekRange) {
       if (new Date(year, month, d).getDay() === target) {
         results.push({ day: d, dow: target });
       }
+    }
+    if (due.skipIfDayAtLeast !== undefined) {
+      return results.filter(r => r.day < due.skipIfDayAtLeast);
     }
     return results;
   }
