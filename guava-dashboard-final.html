@@ -1148,7 +1148,7 @@ function renderUpcoming() {
     if (isToday) del.onclick = () => { upcoming.splice(i,1); saveUpcoming(); renderUpcoming(); };
     else del.style.visibility = 'hidden';
 
-    row.appendChild(typeBtn); row.appendChild(input); row.appendChild(pinBtn); row.appendChild(del);
+    row.appendChild(typeBtn); row.appendChild(input); row.appendChild(del);
     list.appendChild(row);
   });
   const addBtn = document.querySelector('.add-upcoming-btn');
@@ -1253,8 +1253,7 @@ const defaultMonthlyOrbit = {
           { id: 'w1-p3', text: 'promote baby guava music platforms', due: { type:'day', value:2 } }
         ]},
         { name: 'goal commitments', tasks: [
-          { id: 'w1-g1', text: 'reading session',         due: { type:'fluid' } },
-          { id: 'w1-g2', text: 'music discovery session', due: { type:'fluid' } }
+          { id: 'w1-g1', text: 'reading & music discovery session',  due: { type:'fluid' } }
         ]}
       ]},
     { num: 2, theme: 'listen + generate · workflow alignment', emoji: '🎧',
@@ -1266,8 +1265,7 @@ const defaultMonthlyOrbit = {
           { id: 'w2-r1', text: 'promote last month\'s write up', due: { type:'weekday', value:'fri' } }
         ]},
         { name: 'goal commitments', tasks: [
-          { id: 'w2-g1', text: 'reading session',         due: { type:'fluid' } },
-          { id: 'w2-g2', text: 'music discovery session', due: { type:'fluid' } }
+          { id: 'w2-g1', text: 'reading & music discovery session',  due: { type:'fluid' } }
         ]}
       ]},
     { num: 3, theme: 'document + shape · asset curation', emoji: '✍️',
@@ -1283,8 +1281,7 @@ const defaultMonthlyOrbit = {
           { id: 'w3-r1', text: 'promote last month\'s write up', due: { type:'weekday', value:'fri' } }
         ]},
         { name: 'goal commitments', tasks: [
-          { id: 'w3-g1', text: 'reading session',         due: { type:'fluid' } },
-          { id: 'w3-g2', text: 'music discovery session', due: { type:'fluid' } }
+          { id: 'w3-g1', text: 'reading & music discovery session',  due: { type:'fluid' } }
         ]}
       ]},
     { num: 4, theme: 'release + attunement · digital zero sweep', emoji: '🪐',
@@ -1292,15 +1289,14 @@ const defaultMonthlyOrbit = {
         { name: 'baaaad.fm monthly playlist', tasks: [
           { id: 'w4-p2', text: 'finalize next month\'s playlist',                  due: { type:'day', value:22 } },
           { id: 'w4-p3', text: 'edit, finalize, & publish writeup to Substack',   due: { type:'eom' } },
-          { id: 'w4-p4', text: 'post across all socials',                          due: { type:'eom' } },
+          { id: 'w4-p4', text: 'post across all socials',                         due: { type:'eom' } },
           { id: 'w4-p5', text: 'mirror next month\'s playlist',                          due: { type:'eom' } }
         ]},
         { name: 'baaaad.fm promo retrospective', tasks: [
           { id: 'w4-r1', text: 'promote last month\'s write up', due: { type:'weekday', value:'fri', skipIfDayAtLeast: 27 } }
         ]},
         { name: 'goal commitments', tasks: [
-          { id: 'w4-g1', text: 'reading session',         due: { type:'fluid' } },
-          { id: 'w4-g2', text: 'music discovery session', due: { type:'fluid' } }
+          { id: 'w4-g1', text: 'reading & music discovery session',  due: { type:'fluid' } }
         ]}
       ]}
   ]
