@@ -258,7 +258,7 @@
     letter-spacing: 0.06em; display: block; transition: color 0.2s;
   }
   .add-upcoming-btn:hover { color: var(--text); }
-  
+
   /* ── MORNING ROUTINE ── */
   .routine-card {
     background: var(--blue-dim);
@@ -279,7 +279,7 @@
     padding: 2px 8px; cursor: pointer; transition: all 0.2s;
   }
   .routine-edit-btn:hover { border-color: var(--blue-text); }
-  
+
   .routine-note {
     font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.85rem; color: var(--blue-text); margin-bottom: 0.75rem; line-height: 1.4;
   }
@@ -376,120 +376,267 @@
   .focus-item.done .focus-check::after { content: '✓'; font-size: 9px; color: #0a1a10; }
   .focus-item.done .focus-input { text-decoration: line-through; color: var(--done-text); }
 
-  /* ── TABS ── */
-  .tabs-wrapper { margin-bottom: 1.25rem; }
-
-  .tabs {
-    display: flex; overflow-x: auto;
-    border-bottom: 1px solid var(--border); scrollbar-width: none;
+  /* ── MONTHLY ORBIT ── */
+  .monthly-card {
+    background: var(--plum-dim);
+    border: 1px solid #4a2870;
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.25rem;
   }
-  .tabs::-webkit-scrollbar { display: none; }
 
-  .tab {
-    font-family: 'DM Mono', monospace; font-size: 10px;
+  .monthly-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.85rem;
+  }
+
+  .monthly-edit-btn {
+    font-family: 'DM Mono', monospace; font-size: 9px;
     letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 0.5rem 1rem; border: none;
-    background: var(--surface); color: var(--muted);
-    cursor: pointer; border-bottom: 2px solid transparent;
-    margin-bottom: -1px; white-space: nowrap; transition: all 0.2s;
+    background: none; border: 1px solid #4a2870;
+    color: var(--plum-text); border-radius: 10px;
+    padding: 2px 8px; cursor: pointer; transition: all 0.2s;
   }
-  .tab:hover { color: var(--text-dim); }
-  .tab.active { background: var(--card); color: var(--text); border-bottom-color: var(--plum-text); }
+  .monthly-edit-btn:hover { border-color: var(--plum-text); }
 
-  .tab-panel {
-    display: none; padding: 1rem;
-    background: var(--card);
-    border: 1px solid var(--border); border-top: none;
-    border-radius: 0 0 10px 10px;
+  .month-bar {
+    display: flex; align-items: center; gap: 0.6rem;
+    margin-bottom: 0.85rem; padding-bottom: 0.7rem;
+    border-bottom: 1px solid #4a2870;
   }
-  .tab-panel.active { display: block; }
+  .month-nav {
+    background: none; border: 1px solid #4a2870;
+    color: var(--plum-text);
+    width: 22px; height: 22px;
+    border-radius: 4px; cursor: pointer;
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .month-nav:hover { border-color: var(--plum-text); }
+  .month-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem; color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .month-today {
+    font-size: 9px; color: var(--plum-text); font-style: italic;
+    letter-spacing: 0.04em; margin-left: auto;
+  }
 
-  /* ── ACCORDION ── */
-  .accordion { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; overflow: hidden; }
+  .trackers {
+    display: flex; flex-direction: column; gap: 0.55rem;
+    margin-bottom: 0.85rem; padding-bottom: 0.7rem;
+    border-bottom: 1px solid #4a2870;
+  }
+  .tracker {
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .tracker-label {
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--plum-text);
+    min-width: 80px; flex-shrink: 0;
+  }
+  .tracker-progress {
+    flex: 1; height: 3px;
+    background: #1f1430; border-radius: 10px; overflow: hidden;
+  }
+  .tracker-fill {
+    height: 100%; background: var(--plum-text);
+    border-radius: 10px; transition: width 0.4s ease;
+  }
+  .tracker-count {
+    font-size: 10px; color: var(--text);
+    display: flex; align-items: center; gap: 4px;
+    flex-shrink: 0;
+  }
+  .tracker-count-input {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    width: 32px; background: transparent; border: none;
+    color: var(--text); outline: none; text-align: right;
+    border-bottom: 1px dashed transparent;
+  }
+  .tracker-count-input:not([readonly]) { border-bottom-color: #4a2870; }
+  .tracker-target-input {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    width: 28px; background: transparent; border: none;
+    color: var(--text); outline: none; text-align: left;
+    border-bottom: 1px dashed transparent;
+  }
+  .tracker-target-input:not([readonly]) { border-bottom-color: #4a2870; }
+  .tracker-period { font-size: 9px; color: var(--muted); }
+  .tracker-tap {
+    background: none; border: 1px solid #4a2870; color: var(--plum-text);
+    border-radius: 4px; width: 20px; height: 20px;
+    font-size: 12px; cursor: pointer; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .tracker-tap:hover { background: #4a2870; }
+  .tracker-del {
+    background: none; border: none; color: var(--faint);
+    cursor: pointer; font-size: 14px; padding: 0 2px;
+    line-height: 1; flex-shrink: 0; transition: color 0.2s;
+  }
+  .tracker-del:hover { color: var(--pink) !important; }
 
-  .accordion-header {
+  .today-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; color: var(--text);
+    padding: 0.55rem 0.7rem;
+    background: rgba(74, 40, 112, 0.35);
+    border-radius: 6px;
+    margin-bottom: 0.85rem;
+    letter-spacing: 0.02em;
+  }
+  .today-bar-left { display: flex; align-items: center; gap: 0.5rem; }
+  .today-bar-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--plum-text);
+    flex-shrink: 0;
+  }
+  .today-bar-count {
+    background: var(--plum); color: var(--text);
+    padding: 1px 7px; border-radius: 10px;
+    font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .today-bar-clear {
+    color: var(--plum-text); font-size: 9px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  .weeks-container { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .week-accordion {
+    border: 1px solid #4a2870; border-radius: 8px;
+    overflow: hidden; background: rgba(0,0,0,0.2);
+  }
+  .week-accordion-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 0.65rem 0.85rem; cursor: pointer;
-    background: var(--surface); transition: background 0.15s;
+    background: rgba(74, 40, 112, 0.25);
+    transition: background 0.15s;
   }
-  .accordion-header:hover { background: var(--card-hover); }
+  .week-accordion-header:hover { background: rgba(74, 40, 112, 0.45); }
+  .week-accordion.current .week-accordion-header { background: rgba(160, 122, 176, 0.3); }
+  .week-accordion-title {
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text); display: flex; align-items: center; gap: 0.4rem;
+  }
+  .week-emoji { font-size: 13px; }
+  .week-accordion-meta { display: flex; align-items: center; gap: 0.5rem; }
+  .week-range-label {
+    font-size: 9px; color: var(--plum-text);
+    letter-spacing: 0.04em;
+  }
+  .week-current-pill {
+    font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase;
+    background: var(--plum); color: var(--text);
+    padding: 1px 6px; border-radius: 10px;
+  }
+  .week-accordion-arrow { font-size: 10px; color: var(--plum-text); transition: transform 0.2s; }
+  .week-accordion.open .week-accordion-arrow { transform: rotate(180deg); }
+  .week-accordion-body { display: none; padding: 0.65rem 0.85rem 0.75rem; }
+  .week-accordion.open .week-accordion-body { display: block; }
 
-  .accordion-title { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
-  .accordion-meta { display: flex; align-items: center; gap: 0.5rem; }
-  .accordion-count { font-size: 10px; color: var(--muted); }
-  .accordion-arrow { font-size: 10px; color: var(--muted); transition: transform 0.2s; }
-  .accordion.open .accordion-arrow { transform: rotate(180deg); }
+  .week-theme {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 0.8rem; color: var(--plum-text);
+    margin-bottom: 0.7rem; line-height: 1.4;
+  }
 
-  .accordion-body { display: none; padding: 0.5rem 0.85rem 0.75rem; background: var(--bg); }
-  .accordion.open .accordion-body { display: block; }
+  .stream-block { margin-bottom: 0.7rem; }
+  .stream-block:last-child { margin-bottom: 0; }
+  .stream-label {
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 0.3rem;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .stream-label-input {
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); background: transparent;
+    border: none; outline: none; flex: 1;
+    border-bottom: 1px dashed transparent;
+  }
+  .stream-label-input:not([readonly]) { border-bottom-color: #4a2870; }
 
-  /* ── TASKS ── */
-  .task-list { display: flex; flex-direction: column; gap: 1px; }
+  .stream-tasks { display: flex; flex-direction: column; gap: 1px; }
 
-  .task {
+  .monthly-task {
     display: flex; align-items: center; gap: 0.5rem;
-    padding: 0.45rem 0.4rem; border-radius: 5px; transition: background 0.15s;
+    padding: 0.4rem 0.4rem; border-radius: 5px;
+    transition: background 0.15s;
   }
-  .task:hover { background: var(--card); }
-
-  .task-checkbox {
-    width: 13px; height: 13px; border: 1.5px solid var(--border);
+  .monthly-task:hover { background: rgba(74, 40, 112, 0.25); }
+  .monthly-task-checkbox {
+    width: 13px; height: 13px; border: 1.5px solid #4a2870;
     border-radius: 3px; flex-shrink: 0; cursor: pointer;
     display: flex; align-items: center; justify-content: center; transition: all 0.2s;
   }
-  .task.done .task-checkbox { background: var(--done); border-color: var(--done); }
-  .task.done .task-checkbox::after { content: '✓'; font-size: 8px; color: var(--muted); }
-
-  .task-name {
+  .monthly-task.done .monthly-task-checkbox { background: var(--done); border-color: var(--done); }
+  .monthly-task.done .monthly-task-checkbox::after { content: '✓'; font-size: 8px; color: var(--muted); }
+  .monthly-task-text {
     font-size: 12px; color: var(--text); flex: 1;
     border: none; background: transparent; outline: none;
     font-family: 'DM Mono', monospace; padding: 0; min-width: 0;
   }
-  .task.done .task-name { text-decoration: line-through; color: var(--done-text); }
-
-  .task-del {
+  .monthly-task.done .monthly-task-text { text-decoration: line-through; color: var(--done-text); }
+  .monthly-task-due {
+    font-size: 9px; color: var(--plum-text); white-space: nowrap;
+    letter-spacing: 0.04em; flex-shrink: 0;
+  }
+  .monthly-task.today-due .monthly-task-due {
+    background: var(--plum); color: var(--text);
+    padding: 1px 6px; border-radius: 10px;
+    text-transform: uppercase;
+  }
+  .monthly-task.overdue .monthly-task-due { color: var(--pink-text); }
+  .monthly-task.fluid .monthly-task-due { color: var(--muted); font-style: italic; }
+  .monthly-task-del {
     background: none; border: none; color: transparent;
     cursor: pointer; font-size: 14px; padding: 0 2px;
     flex-shrink: 0; line-height: 1; transition: color 0.2s;
   }
-  .task:hover .task-del { color: var(--faint); }
-  .task-del:hover { color: var(--pink) !important; }
+  .monthly-task:hover .monthly-task-del { color: var(--faint); }
+  .monthly-task-del:hover { color: var(--pink) !important; }
 
-  .add-task {
+  .monthly-add-task {
     font-family: 'DM Mono', monospace; font-size: 11px;
-    border: 1px dashed var(--border); border-radius: 5px;
+    border: 1px dashed #4a2870; border-radius: 5px;
     padding: 0.35rem 0.6rem; width: 100%;
     background: transparent; color: var(--text); outline: none;
-    margin-top: 0.4rem; transition: border-color 0.2s;
+    margin-top: 0.4rem;
   }
-  .add-task:focus { border-color: var(--muted); }
-  .add-task::placeholder { color: var(--faint); }
+  .monthly-add-task:focus { border-color: var(--plum-text); border-style: solid; }
+  .monthly-add-task::placeholder { color: var(--faint); }
 
-  /* ── MONTH STATUS ── */
-  .month-status {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0.5rem 0; border-bottom: 1px solid var(--border-soft);
+  .monthly-add-btn {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--plum-text); background: none;
+    border: 1px dashed #4a2870; border-radius: 5px;
+    padding: 0.4rem 0.6rem; width: 100%;
+    cursor: pointer; margin-top: 0.5rem;
+    transition: all 0.2s;
   }
-  .month-status:last-child { border-bottom: none; }
-  .month-name { font-size: 12px; color: var(--text); flex: 1; }
+  .monthly-add-btn:hover { border-color: var(--plum-text); border-style: solid; }
 
-  .month-name-input {
-    font-family: 'DM Mono', monospace; font-size: 12px;
-    border: none; background: transparent; color: var(--text);
-    flex: 1; outline: none; padding: 0;
+  .monthly-actions {
+    display: flex; gap: 0.5rem; margin-top: 0.85rem;
+    padding-top: 0.75rem; border-top: 1px solid #4a2870;
   }
-  .month-name-input[readonly] { cursor: default; }
-
-  .month-badge {
-    font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+  .monthly-reset-btn {
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: none; border: 1px solid #4a2870;
+    color: var(--plum-text); border-radius: 20px;
+    padding: 0.3rem 0.75rem; cursor: pointer;
+    transition: all 0.2s;
   }
-  .badge-active { background: var(--pink-dim); color: var(--pink-text); }
-  .badge-next { background: var(--border-soft); color: var(--muted); }
-  .badge-done { background: var(--green-dim); color: var(--green-text); }
-
-  /* ── SECTION SEP ── */
-  .section-sep { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); padding: 0.85rem 0 0.4rem; }
+  .monthly-reset-btn:hover { border-color: var(--pink); color: var(--pink-text); }
 
   /* ── BRAIN/EOD ── */
   .brain-area {
@@ -580,7 +727,7 @@
   <div class="routine-note">order is flexible on off days.<br>recommended the evening before a work day.</div>
   <div class="task-list" id="routineItems"></div>
   <div id="routineAddRow" style="display:none; margin-bottom:0.5rem;">
-    <input class="add-task" id="routineAddInput" placeholder="+ add routine item (enter)" onkeydown="addRoutineItem(event)">
+    <input class="add-task" id="routineAddInput" placeholder="+ add routine item (enter)" onkeydown="addRoutineItem(event)" style="font-family:'DM Mono',monospace;font-size:11px;border:1px dashed var(--border);border-radius:5px;padding:0.35rem 0.6rem;width:100%;background:transparent;color:var(--text);outline:none;">
   </div>
 </div>
 
@@ -612,7 +759,7 @@
   </div>
   <div class="sprint-items" id="sprintItems"></div>
   <div id="sprintAddRow" style="display:none; margin-bottom:0.5rem;">
-    <input class="add-task" id="sprintAddInput" placeholder="+ add sprint item (enter)" onkeydown="addSprintItem(event)">
+    <input class="add-task" id="sprintAddInput" placeholder="+ add sprint item (enter)" onkeydown="addSprintItem(event)" style="font-family:'DM Mono',monospace;font-size:11px;border:1px dashed var(--border);border-radius:5px;padding:0.35rem 0.6rem;width:100%;background:transparent;color:var(--text);outline:none;">
   </div>
   <div class="progress-row">
     <div class="progress-track">
@@ -621,8 +768,6 @@
     <div class="progress-label" id="sprintProgress">in progress</div>
   </div>
 </div>
-
-
 
 <!-- TODAY'S THREE -->
 <div class="card fade fade-3">
@@ -635,8 +780,6 @@
   </div>
 </div>
 
-
-
 <!-- BRAIN DUMP -->
 <div class="card fade fade-5">
   <div class="section-label" style="margin-bottom:0.5rem">
@@ -645,152 +788,33 @@
   <textarea class="brain-area" id="brainDump" placeholder="what's looping in your head right now… get it out of there"></textarea>
 </div>
 
-
-
 <div class="divider fade fade-4"></div>
 
-<!-- Added Header for Tabbed Project Section -->
-<div class="section-label fade fade-4" style="margin-bottom:0.75rem;">
-  <span class="label-dot" style="background:var(--plum-text)"></span>project ecosystem
-</div>
-
-
-<!-- DOMAIN TABS -->
-<div class="tabs-wrapper fade fade-4">
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('laelia',this)">Laelia</button>
-    <button class="tab" onclick="switchTab('baaaad',this)">baaaad.fm</button>
-    <button class="tab" onclick="switchTab('baby',this)">baby guava</button>
-    <button class="tab" onclick="switchTab('home',this)">home</button>
+<!-- MONTHLY ORBIT (replaces project ecosystem) -->
+<div class="monthly-card fade fade-4">
+  <div class="monthly-header">
+    <div class="section-label" style="margin-bottom:0">
+      <span class="label-dot" style="background:var(--plum-text)"></span>
+      monthly orbit
+    </div>
+    <button class="monthly-edit-btn" id="monthlyEditBtn" onclick="toggleMonthlyEdit()">edit</button>
   </div>
 
-  <!-- LAELIA -->
-  <div class="tab-panel active" id="panel-laelia">
-    <div class="section-sep">ecosystem maintenance</div>
-    <!-- Removed 'open' class to default closed -->
-    <div class="accordion"> 
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">botanica</span><div class="accordion-meta"><span class="accordion-count">wellness</span><span class="accordion-arrow">▾</span></div></div>
-      <div class="accordion-body"><div class="task-list" id="tl-botanica"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-botanica')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">expand</span><div class="accordion-meta"><span class="accordion-count">business & career</span><span class="accordion-arrow">▾</span></div></div>
-      <div class="accordion-body"><div class="task-list" id="tl-expand"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-expand')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">awaken</span><div class="accordion-meta"><span class="accordion-count">media house</span><span class="accordion-arrow">▾</span></div></div>
-      <div class="accordion-body"><div class="task-list" id="tl-awaken"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-awaken')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">learn</span><div class="accordion-meta"><span class="accordion-count">education</span><span class="accordion-arrow">▾</span></div></div>
-      <div class="accordion-body"><div class="task-list" id="tl-learn"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-learn')"></div>
-    </div>
-    <div class="section-sep">core operations</div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">strategy & development</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-sd"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-sd')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">client success</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-cs"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-cs')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">events</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-events"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-events')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">communications · HR · accounting · IT</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-ops"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-ops')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">attract funding</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-funding"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-funding')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">design</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-design"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-design')"></div>
-    </div>
+  <div class="month-bar">
+    <button class="month-nav" onclick="shiftMonth(-1)">‹</button>
+    <div class="month-label" id="monthLabel"></div>
+    <button class="month-nav" onclick="shiftMonth(1)">›</button>
+    <span class="month-today" id="monthToday"></span>
   </div>
 
-  <!-- BAAAAD.FM -->
-  <div class="tab-panel" id="panel-baaaad">
-    <!-- Removed 'open' class to default closed -->
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">monthly fire</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body">
-        <div id="monthlyFireList"></div>
-        <div id="monthlyFireEditRow" style="display:none; margin-top:0.4rem;">
-          <input class="add-task" id="monthlyFireInput" placeholder="+ add month — name (enter)" onkeydown="addMonthlyFire(event)">
-        </div>
-      </div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">playlist writeups</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-writeups"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-writeups')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">chakra playlists</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-chakra"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-chakra')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">editorial</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-editorial"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-editorial')"></div>
-    </div>
+  <div class="trackers" id="trackers"></div>
 
-  </div>
+  <div class="today-bar" id="todayBar"></div>
 
-  <!-- BABY GUAVA -->
-  <div class="tab-panel" id="panel-baby">
-    <!-- Removed 'open' class to default closed -->
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">general operations</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-bg-ops"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-ops')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">videos (content)</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-bg-videos"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-videos')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">photos (content)</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-bg-photos"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-photos')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">music</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-bg-music"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-music')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">photography projects</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-bg-photo"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-photo')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">visual art</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-bg-art"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-art')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">solo show</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-bg-solo"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-solo')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">books</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-bg-books"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-books')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">tv/film</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-bg-tvfilm"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-tvfilm')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">from the desk of baby guava</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-bg-substack"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-substack')"></div>
-    </div>
-    <div class="accordion">
-      <div class="accordion-header" onclick="toggleAcc(this)"><span class="accordion-title">acting</span><span class="accordion-arrow">▾</span></div>
-      <div class="accordion-body"><div class="task-list" id="tl-bg-acting"></div><input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-bg-acting')"></div>
-    </div>
-  </div>
+  <div class="weeks-container" id="weeksContainer"></div>
 
-  <!-- HOME -->
-  <div class="tab-panel" id="panel-home">
-    <div class="task-list" id="tl-home"></div>
-    <input class="add-task" placeholder="+ add task (enter)" onkeydown="addTask(event,'tl-home')">
+  <div class="monthly-actions" id="monthlyActions" style="display:none;">
+    <button class="monthly-reset-btn" onclick="resetMonthly()">reset to default</button>
   </div>
 </div>
 
@@ -918,11 +942,8 @@ function updateHeader() {
 
 // ── ENERGY ───────────────────────────────────────────────────
 const energyNotes = ['','low — be gentle today','low-medium — take breaks','medium — steady on','medium-high — you\'ve got this','full — use it well'];
-// Energy stored per date — keeps full current week for reflection
-// todayStr is `let` so it can refresh on visibilitychange (stale tab across midnight)
 let todayStr = new Date().toDateString();
 
-// Shared helper: the dateStr for whatever day the pips are currently viewing
 function getViewedDateStr() {
   const viewedDate = new Date();
   const diff = viewedDayIdx - new Date().getDay();
@@ -930,12 +951,10 @@ function getViewedDateStr() {
   viewedDate.setHours(0,0,0,0);
   return viewedDate.toDateString();
 }
-// Get the start of the current week (Sunday)
 const weekStart = new Date();
 weekStart.setDate(weekStart.getDate() - weekStart.getDay());
 weekStart.setHours(0,0,0,0);
 let energyHistory = S.get('energyHistory') || {};
-// clean up anything older than this week's Sunday
 Object.keys(energyHistory).forEach(k => {
   if (new Date(k) < weekStart) delete energyHistory[k];
 });
@@ -979,10 +998,6 @@ document.getElementById('energyDots').addEventListener('click', e => {
   renderEnergy();
 });
 
-// updateHeader() is called at the END of the script, after all let/const
-// initialization, to avoid temporal dead zone errors when it invokes
-// renderUpcoming/renderDailyFields (which reference `upcoming`, etc.)
-
 // ── INTENTION ────────────────────────────────────────────────
 const intentionEl = document.getElementById('weeklyIntention');
 intentionEl.value = S.get('intention') || '';
@@ -1002,28 +1017,26 @@ let routineEditMode = false;
 function loadRoutine() {
   const container = document.getElementById('routineItems');
   container.innerHTML = '';
-  // use date-keyed storage for the checkboxes, just like the focus items
   const d = getViewedDateStr();
   const savedChecks = S.get('routineChecks-' + d) || {};
-  // get the actual list items (which are persistent, not date keyed)
   let routineItems = S.get('routineItems');
   if (!Array.isArray(routineItems) || routineItems.length === 0) routineItems = defaultRoutine.map(t => ({text: t.text}));
 
   routineItems.forEach((item, i) => {
     const row = document.createElement('div');
     const isDone = !!savedChecks[i];
-    row.className = 'task' + (isDone ? ' done' : '');
+    row.style.cssText = 'display:flex;align-items:center;gap:0.5rem;padding:0.45rem 0.4rem;border-radius:5px;';
 
     const cb = document.createElement('div');
-    cb.className = 'task-checkbox';
-    // Disable clicking the checkbox if not viewing today AND not in edit mode
+    cb.style.cssText = 'width:13px;height:13px;border:1.5px solid var(--border);border-radius:3px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;';
+    if (isDone) { cb.style.background = 'var(--done)'; cb.style.borderColor = 'var(--done)'; cb.innerHTML = '<span style="font-size:8px;color:var(--muted);">✓</span>'; }
     if (viewedDayIdx === new Date().getDay() || routineEditMode) {
-      cb.onclick = () => { 
-        if (viewedDayIdx !== new Date().getDay()) return; // only save checks for today
-        row.classList.toggle('done'); 
+      cb.onclick = () => {
+        if (viewedDayIdx !== new Date().getDay()) return;
         const currentChecks = S.get('routineChecks-' + todayStr) || {};
-        currentChecks[i] = row.classList.contains('done');
+        currentChecks[i] = !currentChecks[i];
         S.set('routineChecks-' + todayStr, currentChecks);
+        loadRoutine();
       };
     } else {
         cb.style.opacity = '0.5';
@@ -1031,43 +1044,41 @@ function loadRoutine() {
     }
 
     const input = document.createElement('input');
-    input.className = 'task-name';
+    input.style.cssText = 'font-size:12px;color:var(--text);flex:1;border:none;background:transparent;outline:none;font-family:\'DM Mono\',monospace;padding:0;min-width:0;';
     input.value = item.text;
+    if (isDone) input.style.textDecoration = 'line-through';
+    if (isDone) input.style.color = 'var(--done-text)';
     input.readOnly = !routineEditMode;
     if (routineEditMode) {
-        input.oninput = () => { 
-            routineItems[i].text = input.value; 
-            S.set('routineItems', routineItems); 
+        input.oninput = () => {
+            routineItems[i].text = input.value;
+            S.set('routineItems', routineItems);
         };
     }
     input.onclick = e => e.stopPropagation();
 
     const del = document.createElement('button');
-    del.className = 'task-del';
+    del.style.cssText = 'background:none;border:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 2px;flex-shrink:0;line-height:1;';
     del.innerHTML = '×';
     del.style.display = routineEditMode ? 'block' : 'none';
-    del.onclick = e => { 
-        e.stopPropagation(); 
-        routineItems.splice(i,1); 
-        S.set('routineItems', routineItems); 
-        
-        // Also clean up the check state for the deleted item
+    del.onclick = e => {
+        e.stopPropagation();
+        routineItems.splice(i,1);
+        S.set('routineItems', routineItems);
         const currentChecks = S.get('routineChecks-' + todayStr) || {};
         const newChecks = {};
-        // Shift checks down
         for(let j=0; j < routineItems.length; j++) {
             if(j < i) newChecks[j] = currentChecks[j];
             if(j >= i) newChecks[j] = currentChecks[j+1];
         }
         S.set('routineChecks-' + todayStr, newChecks);
-
-        loadRoutine(); 
+        loadRoutine();
     };
 
     row.appendChild(cb); row.appendChild(input); row.appendChild(del);
     container.appendChild(row);
   });
-  
+
   document.getElementById('routineAddRow').style.display = routineEditMode ? 'block' : 'none';
   document.getElementById('routineEditBtn').textContent = routineEditMode ? 'done' : 'edit';
 }
@@ -1084,7 +1095,7 @@ function addRoutineItem(e) {
   let routineItems = S.get('routineItems');
   if (!Array.isArray(routineItems)) routineItems = defaultRoutine.map(t => ({text: t.text}));
   routineItems.push({ text: val });
-  S.set('routineItems', routineItems); 
+  S.set('routineItems', routineItems);
   loadRoutine();
   e.target.value = '';
 }
@@ -1105,7 +1116,6 @@ function renderUpcoming() {
   list.innerHTML = '';
   const isToday = viewedDayIdx === new Date().getDay();
   upcoming.forEach((item, i) => {
-    // when viewing a non-today pip, skip unpinned items entirely
     if (!isToday && !item.pinned) return;
     const row = document.createElement('div');
     row.className = 'upcoming-item';
@@ -1141,7 +1151,6 @@ function renderUpcoming() {
     row.appendChild(typeBtn); row.appendChild(input); row.appendChild(pinBtn); row.appendChild(del);
     list.appendChild(row);
   });
-  // hide the + add button when viewing another day
   const addBtn = document.querySelector('.add-upcoming-btn');
   if (addBtn) addBtn.style.display = isToday ? '' : 'none';
 }
@@ -1221,95 +1230,560 @@ function addSprintItem(e) {
 
 renderSprint();
 
-// ── MONTHLY FIRE ─────────────────────────────────────────────
-const defaultMonthlyFire = [
-  { name:'marzo 2026 — high art rap', status:'done' },
-  { name:'abril 2026 — rap stars', status:'active' },
-  { name:'mayo 2026 — melodic madness 4.0', status:'next' },
-  { name:'junio 2026 — soulful dance', status:'next' }
-];
+// ── MONTHLY ORBIT ─────────────────────────────────────────────
+const weekdayMap = { sun:0, mon:1, tue:2, wed:3, thu:4, fri:5, sat:6 };
+const weekdayShort = ['sun','mon','tue','wed','thu','fri','sat'];
 
-let monthlyFire = S.get('monthlyFire');
-if (!Array.isArray(monthlyFire) || monthlyFire.length === 0) monthlyFire = defaultMonthlyFire;
-let fireEditMode = false;
-const fireStatusCycle = { done:'active', active:'next', next:'done' };
-const fireBadgeClass = { active:'badge-active', next:'badge-next', done:'badge-done' };
-const fireBadgeLabel = { active:'in progress', next:'next', done:'done ✓' };
+const defaultMonthlyOrbit = {
+  trackers: [
+    { id: 'reading',    label: 'reading',    current: 0, target: 15, period: 'yr' },
+    { id: 'coursework', label: 'coursework', current: 0, target: 3,  period: 'wk' }
+  ],
+  weeks: [
+    { num: 1, theme: 'discover + orient · intent setting', emoji: '🌌',
+      streams: [
+        { name: 'cosmic alignment', tasks: [
+          { id: 'w1-c1', text: 'card reading — 3 strategic nodes (laelia, baby guava, baaaad.fm)', due: { type:'day', value:5 } }
+        ]},
+        { name: 'baaaad.fm monthly playlist', tasks: [
+          { id: 'w1-p1', text: 'public playlist lock — youtube, spotify, apple music', due: { type:'day', value:1 } },
+          { id: 'w1-p2', text: 'graphic design — playlist artwork in ledger',          due: { type:'day', value:1 } },
+          { id: 'w1-p3', text: 'baby guava platform growth promo',                      due: { type:'day', value:2 } }
+        ]},
+        { name: 'music library architecture', tasks: [
+          { id: 'w1-m1', text: 'sort unorganized album arrivals into thematic pools', due: { type:'fluid' } }
+        ]},
+        { name: 'fluid lifestyle', tasks: [
+          { id: 'w1-l1', text: 'coursework sessions (3x/week)', due: { type:'fluid' } },
+          { id: 'w1-l2', text: 'zero-pressure reading',          due: { type:'fluid' } }
+        ]}
+      ]},
+    { num: 2, theme: 'listen + generate · workflow alignment', emoji: '🎧',
+      streams: [
+        { name: 'baaaad.fm monthly playlist', tasks: [
+          { id: 'w2-p1', text: 'paste 3 playlist hyperlinks into living document', due: { type:'day', value:7 } }
+        ]},
+        { name: 'baaaad.fm promo retrospective', tasks: [
+          { id: 'w2-r1', text: 'spotlight previous month write-up', due: { type:'weekday', value:'fri' } }
+        ]},
+        { name: 'music library architecture', tasks: [
+          { id: 'w2-m1', text: 'process backlog tasks in Asana music library', due: { type:'fluid' } }
+        ]},
+        { name: 'fluid lifestyle', tasks: [
+          { id: 'w2-l1', text: 'coursework sessions (3x/week)', due: { type:'fluid' } },
+          { id: 'w2-l2', text: 'zero-pressure reading',          due: { type:'fluid' } }
+        ]}
+      ]},
+    { num: 3, theme: 'document + shape · asset curation', emoji: '✍️',
+      streams: [
+        { name: 'baaaad.fm monthly playlist', tasks: [
+          { id: 'w3-p1', text: 'baaaad.fm energy reading — pull & analyze for write-up', due: { type:'day', value:14 } },
+          { id: 'w3-p2', text: 'playlist overview graphic — 5 highlighted tracks',        due: { type:'day', value:15 } }
+        ]},
+        { name: 'baaaad.fm concept drafting', tasks: [
+          { id: 'w3-d1', text: 'draft concept based on reading & whim', due: { type:'day', value:21 } }
+        ]},
+        { name: 'baaaad.fm promo retrospective', tasks: [
+          { id: 'w3-r1', text: 'spotlight previous month write-up', due: { type:'weekday', value:'fri' } }
+        ]},
+        { name: 'music library architecture', tasks: [
+          { id: 'w3-m1', text: 'process album backlog in Asana', due: { type:'fluid' } }
+        ]},
+        { name: 'fluid lifestyle', tasks: [
+          { id: 'w3-l1', text: 'coursework sessions (3x/week)', due: { type:'fluid' } },
+          { id: 'w3-l2', text: 'zero-pressure reading',          due: { type:'fluid' } }
+        ]}
+      ]},
+    { num: 4, theme: 'release + attunement · digital zero sweep', emoji: '🪐',
+      streams: [
+        { name: 'baaaad.fm monthly playlist', tasks: [
+          { id: 'w4-p1', text: 'playlist distribution check — verify upcoming month tracks', due: { type:'day', value:22 } },
+          { id: 'w4-p2', text: 'finalize upcoming month playlist',                            due: { type:'day', value:22 } },
+          { id: 'w4-p3', text: 'publish official write-up to substack',                       due: { type:'eom' } },
+          { id: 'w4-p4', text: 'master social media promo wave — copy, carousels, pictures', due: { type:'eom' } },
+          { id: 'w4-p5', text: 'cross-platform data duplication — apple → spotify + youtube', due: { type:'eom' } }
+        ]},
+        { name: 'baaaad.fm promo retrospective', tasks: [
+          { id: 'w4-r1', text: 'spotlight previous month write-up', due: { type:'weekday', value:'fri' } }
+        ]},
+        { name: 'system maintenance', tasks: [
+          { id: 'w4-s1', text: 'browser & hub clearout — tab zero, archive Asana rows', due: { type:'eom' } }
+        ]},
+        { name: 'fluid lifestyle', tasks: [
+          { id: 'w4-l1', text: 'coursework weekend safety net', due: { type:'fluid' } },
+          { id: 'w4-l2', text: 'update annual reading metrics',  due: { type:'eom' } }
+        ]}
+      ]}
+  ]
+};
 
-function saveMonthlyFire() { S.set('monthlyFire', monthlyFire); }
+let monthlyEditMode = false;
+let viewedMonth = realNow.getMonth();
+let viewedYear = realNow.getFullYear();
 
-function renderMonthlyFire() {
-  const list = document.getElementById('monthlyFireList');
-  list.innerHTML = '';
-  monthlyFire.forEach((item, i) => {
+function loadMonthlyOrbit() {
+  let m = S.get('monthlyOrbit');
+  if (!m || !Array.isArray(m.weeks)) m = JSON.parse(JSON.stringify(defaultMonthlyOrbit));
+  if (!Array.isArray(m.trackers)) m.trackers = JSON.parse(JSON.stringify(defaultMonthlyOrbit.trackers));
+  return m;
+}
+function saveMonthlyOrbit(m) { S.set('monthlyOrbit', m); }
+
+function monthKey() { return `${viewedYear}-${String(viewedMonth+1).padStart(2,'0')}`; }
+function isViewedMonthReal() { return viewedYear === realNow.getFullYear() && viewedMonth === realNow.getMonth(); }
+
+function getWeekForDay(day) {
+  if (day <= 6) return 1;
+  if (day <= 13) return 2;
+  if (day <= 21) return 3;
+  return 4;
+}
+function getWeekRange(num, year, month) {
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  if (num === 1) return [1, 6];
+  if (num === 2) return [7, 13];
+  if (num === 3) return [14, 21];
+  return [22, daysInMonth];
+}
+
+function resolveDueDates(due, year, month, weekRange) {
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const [start, end] = weekRange;
+  if (due.type === 'day') {
+    if (due.value < start || due.value > end) return [];
+    if (due.value > daysInMonth) return [];
+    return [{ day: due.value, dow: new Date(year, month, due.value).getDay() }];
+  }
+  if (due.type === 'weekday') {
+    const target = weekdayMap[due.value];
+    const results = [];
+    for (let d = start; d <= end && d <= daysInMonth; d++) {
+      if (new Date(year, month, d).getDay() === target) {
+        results.push({ day: d, dow: target });
+      }
+    }
+    return results;
+  }
+  if (due.type === 'eom') {
+    if (end !== daysInMonth) return [];
+    return [{ day: daysInMonth, dow: new Date(year, month, daysInMonth).getDay() }];
+  }
+  return [];
+}
+
+function formatDate(year, month, day) {
+  const dow = weekdayShort[new Date(year, month, day).getDay()];
+  return `${dow} ${day}`;
+}
+
+function countTasksDueOn(m, year, month, day, completion) {
+  let total = 0, done = 0;
+  const week = getWeekForDay(day);
+  const range = getWeekRange(week, year, month);
+  m.weeks.forEach(w => {
+    if (w.num !== week) return;
+    w.streams.forEach(s => {
+      s.tasks.forEach(t => {
+        const resolved = resolveDueDates(t.due, year, month, range);
+        resolved.forEach(occ => {
+          if (occ.day === day) {
+            const tid = `${t.id}-${occ.day}`;
+            total++;
+            if (completion[tid]) done++;
+          }
+        });
+      });
+    });
+  });
+  return { total, done };
+}
+
+function parseDue(str) {
+  if (!str) return { type: 'fluid' };
+  str = str.trim().toLowerCase();
+  if (str === 'fluid' || str === '') return { type: 'fluid' };
+  if (str === 'eom') return { type: 'eom' };
+  const dayMatch = str.match(/^day\s+(\d+)$/);
+  if (dayMatch) {
+    const n = parseInt(dayMatch[1]);
+    if (n > 0 && n <= 31) return { type: 'day', value: n };
+  }
+  const short = str.slice(0,3);
+  if (weekdayMap[short] !== undefined) return { type: 'weekday', value: short };
+  return { type: 'fluid' };
+}
+
+function renderMonthly() {
+  const m = loadMonthlyOrbit();
+  const isRealMonth = isViewedMonthReal();
+  const realDay = realNow.getDate();
+  const currentWeek = getWeekForDay(realDay);
+  const mKey = monthKey();
+  const completion = S.get('monthlyTaskComplete-' + mKey) || {};
+
+  document.getElementById('monthLabel').textContent = `${months[viewedMonth].toLowerCase()} ${viewedYear}`;
+  document.getElementById('monthToday').textContent = isRealMonth ? '' : `today: ${months[realNow.getMonth()].toLowerCase()} ${realDay}`;
+
+  // Trackers
+  const trackersEl = document.getElementById('trackers');
+  trackersEl.innerHTML = '';
+  m.trackers.forEach((t, idx) => {
     const row = document.createElement('div');
-    row.className = 'month-status';
+    row.className = 'tracker';
 
-    const input = document.createElement('input');
-    input.className = 'month-name-input';
-    input.value = item.name;
-    input.readOnly = !fireEditMode;
-    input.oninput = () => { monthlyFire[i].name = input.value; saveMonthlyFire(); };
+    const label = document.createElement('div');
+    label.className = 'tracker-label';
+    if (monthlyEditMode) {
+      const labelInput = document.createElement('input');
+      labelInput.style.cssText = 'font-family:\'DM Mono\',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--plum-text);background:transparent;border:none;outline:none;width:80px;border-bottom:1px dashed #4a2870;';
+      labelInput.value = t.label;
+      labelInput.oninput = () => { m.trackers[idx].label = labelInput.value; saveMonthlyOrbit(m); };
+      label.appendChild(labelInput);
+    } else {
+      label.textContent = t.label;
+    }
+    row.appendChild(label);
 
-    const badge = document.createElement('span');
-    badge.className = `month-badge ${fireBadgeClass[item.status]}`;
-    badge.textContent = fireBadgeLabel[item.status];
-    badge.style.cursor = fireEditMode ? 'pointer' : 'default';
-    if (fireEditMode) {
-      badge.onclick = () => { monthlyFire[i].status = fireStatusCycle[item.status]; saveMonthlyFire(); renderMonthlyFire(); };
+    const progress = document.createElement('div');
+    progress.className = 'tracker-progress';
+    const fill = document.createElement('div');
+    fill.className = 'tracker-fill';
+    const pct = t.target > 0 ? Math.min(100, (t.current / t.target) * 100) : 0;
+    fill.style.width = pct + '%';
+    progress.appendChild(fill);
+    row.appendChild(progress);
+
+    const count = document.createElement('div');
+    count.className = 'tracker-count';
+
+    const currentInput = document.createElement('input');
+    currentInput.type = 'number';
+    currentInput.className = 'tracker-count-input';
+    currentInput.value = t.current;
+    currentInput.readOnly = !monthlyEditMode;
+    currentInput.oninput = () => {
+      m.trackers[idx].current = parseInt(currentInput.value) || 0;
+      saveMonthlyOrbit(m);
+      const newPct = m.trackers[idx].target > 0 ? Math.min(100, (m.trackers[idx].current / m.trackers[idx].target) * 100) : 0;
+      fill.style.width = newPct + '%';
+    };
+    count.appendChild(currentInput);
+
+    const slash = document.createElement('span');
+    slash.textContent = '/';
+    slash.style.color = 'var(--muted)';
+    count.appendChild(slash);
+
+    const targetInput = document.createElement('input');
+    targetInput.type = 'number';
+    targetInput.className = 'tracker-target-input';
+    targetInput.value = t.target;
+    targetInput.readOnly = !monthlyEditMode;
+    targetInput.oninput = () => {
+      m.trackers[idx].target = parseInt(targetInput.value) || 1;
+      saveMonthlyOrbit(m);
+      const newPct = m.trackers[idx].target > 0 ? Math.min(100, (m.trackers[idx].current / m.trackers[idx].target) * 100) : 0;
+      fill.style.width = newPct + '%';
+    };
+    count.appendChild(targetInput);
+
+    const period = document.createElement('span');
+    period.className = 'tracker-period';
+    period.textContent = '/' + t.period;
+    count.appendChild(period);
+
+    row.appendChild(count);
+
+    if (!monthlyEditMode) {
+      const tap = document.createElement('button');
+      tap.className = 'tracker-tap';
+      tap.textContent = '+';
+      tap.title = 'add 1';
+      tap.onclick = () => {
+        m.trackers[idx].current = (m.trackers[idx].current || 0) + 1;
+        saveMonthlyOrbit(m);
+        renderMonthly();
+      };
+      row.appendChild(tap);
+    } else {
+      const del = document.createElement('button');
+      del.className = 'tracker-del';
+      del.innerHTML = '×';
+      del.onclick = () => { m.trackers.splice(idx, 1); saveMonthlyOrbit(m); renderMonthly(); };
+      row.appendChild(del);
     }
 
-    const del = document.createElement('button');
-    del.className = 'del-btn';
-    del.innerHTML = '×';
-    del.style.display = fireEditMode ? 'block' : 'none';
-    del.style.color = 'var(--faint)';
-    del.onclick = () => { monthlyFire.splice(i,1); saveMonthlyFire(); renderMonthlyFire(); };
-
-    row.appendChild(input); row.appendChild(badge); row.appendChild(del);
-    list.appendChild(row);
+    trackersEl.appendChild(row);
   });
 
-  document.getElementById('monthlyFireEditRow').style.display = fireEditMode ? 'block' : 'none';
+  if (monthlyEditMode) {
+    const addBtn = document.createElement('button');
+    addBtn.className = 'monthly-add-btn';
+    addBtn.textContent = '+ add tracker';
+    addBtn.onclick = () => {
+      const label = prompt('tracker name (e.g. "reading", "workouts")?');
+      if (!label) return;
+      const target = parseInt(prompt('target number?', '10')) || 10;
+      const period = (prompt('period (yr / mo / wk / day)?', 'yr') || 'yr').trim().toLowerCase();
+      m.trackers.push({ id: 'custom-' + Date.now(), label, current: 0, target, period });
+      saveMonthlyOrbit(m); renderMonthly();
+    };
+    trackersEl.appendChild(addBtn);
+  }
+
+  // Today bar
+  const todayBar = document.getElementById('todayBar');
+  todayBar.innerHTML = '';
+  const left = document.createElement('div');
+  left.className = 'today-bar-left';
+  const dot = document.createElement('span');
+  dot.className = 'today-bar-dot';
+  left.appendChild(dot);
+  if (isRealMonth) {
+    const tc = countTasksDueOn(m, realNow.getFullYear(), realNow.getMonth(), realDay, completion);
+    const label = document.createElement('span');
+    label.textContent = `today · ${weekdayShort[realNow.getDay()]} ${months[realNow.getMonth()].toLowerCase()} ${realDay}`;
+    left.appendChild(label);
+    todayBar.appendChild(left);
+    const right = document.createElement('span');
+    if (tc.total === 0) {
+      right.className = 'today-bar-clear';
+      right.textContent = 'no tasks today';
+    } else {
+      right.className = 'today-bar-count';
+      right.textContent = `${tc.done}/${tc.total} done`;
+    }
+    todayBar.appendChild(right);
+  } else {
+    const label = document.createElement('span');
+    label.textContent = `viewing ${months[viewedMonth].toLowerCase()} ${viewedYear}`;
+    left.appendChild(label);
+    todayBar.appendChild(left);
+  }
+
+  // Weeks
+  const weeksContainer = document.getElementById('weeksContainer');
+  weeksContainer.innerHTML = '';
+  m.weeks.forEach((w, wIdx) => {
+    const range = getWeekRange(w.num, viewedYear, viewedMonth);
+    const isCurrentWeek = isRealMonth && w.num === currentWeek;
+    const acc = document.createElement('div');
+    acc.className = 'week-accordion' + (isCurrentWeek ? ' current open' : '');
+
+    const startDow = weekdayShort[new Date(viewedYear, viewedMonth, range[0]).getDay()];
+    const endDow = weekdayShort[new Date(viewedYear, viewedMonth, range[1]).getDay()];
+
+    const header = document.createElement('div');
+    header.className = 'week-accordion-header';
+    header.innerHTML = `
+      <div class="week-accordion-title">
+        <span class="week-emoji">${w.emoji || ''}</span>
+        week ${w.num}
+      </div>
+      <div class="week-accordion-meta">
+        ${isCurrentWeek ? '<span class="week-current-pill">now</span>' : ''}
+        <span class="week-range-label">${startDow} ${range[0]} – ${endDow} ${range[1]}</span>
+        <span class="week-accordion-arrow">▾</span>
+      </div>
+    `;
+    header.onclick = () => acc.classList.toggle('open');
+    acc.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'week-accordion-body';
+
+    if (w.theme) {
+      const theme = document.createElement('div');
+      theme.className = 'week-theme';
+      if (monthlyEditMode) {
+        const themeInput = document.createElement('input');
+        themeInput.style.cssText = 'font-family:\'Playfair Display\',serif;font-style:italic;font-size:0.8rem;color:var(--plum-text);background:transparent;border:none;outline:none;width:100%;border-bottom:1px dashed #4a2870;';
+        themeInput.value = w.theme;
+        themeInput.oninput = () => { m.weeks[wIdx].theme = themeInput.value; saveMonthlyOrbit(m); };
+        theme.appendChild(themeInput);
+      } else {
+        theme.textContent = w.theme;
+      }
+      body.appendChild(theme);
+    }
+
+    w.streams.forEach((s, sIdx) => {
+      const block = document.createElement('div');
+      block.className = 'stream-block';
+
+      const labelEl = document.createElement('div');
+      labelEl.className = 'stream-label';
+      if (monthlyEditMode) {
+        const li = document.createElement('input');
+        li.className = 'stream-label-input';
+        li.value = s.name;
+        li.oninput = () => { m.weeks[wIdx].streams[sIdx].name = li.value; saveMonthlyOrbit(m); };
+        labelEl.appendChild(li);
+        const ds = document.createElement('button');
+        ds.style.cssText = 'background:none;border:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 2px;line-height:1;';
+        ds.innerHTML = '×';
+        ds.onclick = () => { m.weeks[wIdx].streams.splice(sIdx, 1); saveMonthlyOrbit(m); renderMonthly(); };
+        labelEl.appendChild(ds);
+      } else {
+        labelEl.textContent = s.name;
+      }
+      block.appendChild(labelEl);
+
+      const tasksList = document.createElement('div');
+      tasksList.className = 'stream-tasks';
+
+      s.tasks.forEach((t, tIdx) => {
+        const resolved = resolveDueDates(t.due, viewedYear, viewedMonth, range);
+        const occurrences = resolved.length > 0 ? resolved : (t.due.type === 'fluid' ? [null] : []);
+        if (occurrences.length === 0) return;
+
+        occurrences.forEach(occ => {
+          const taskId = occ ? `${t.id}-${occ.day}` : `${t.id}-fluid`;
+          const isDone = !!completion[taskId];
+          const isToday = occ && isRealMonth && occ.day === realDay;
+          const isOverdue = occ && isRealMonth && occ.day < realDay && !isDone;
+          const isFluid = !occ;
+
+          const row = document.createElement('div');
+          row.className = 'monthly-task'
+            + (isDone ? ' done' : '')
+            + (isToday ? ' today-due' : '')
+            + (isOverdue ? ' overdue' : '')
+            + (isFluid ? ' fluid' : '');
+
+          const cb = document.createElement('div');
+          cb.className = 'monthly-task-checkbox';
+          cb.onclick = () => {
+            const c = S.get('monthlyTaskComplete-' + mKey) || {};
+            c[taskId] = !c[taskId];
+            S.set('monthlyTaskComplete-' + mKey, c);
+            renderMonthly();
+          };
+
+          const input = document.createElement('input');
+          input.className = 'monthly-task-text';
+          input.value = t.text;
+          input.readOnly = !monthlyEditMode;
+          if (monthlyEditMode) {
+            input.oninput = () => { m.weeks[wIdx].streams[sIdx].tasks[tIdx].text = input.value; saveMonthlyOrbit(m); };
+          }
+
+          const due = document.createElement('span');
+          due.className = 'monthly-task-due';
+          if (occ) {
+            due.textContent = isToday ? 'today' : formatDate(viewedYear, viewedMonth, occ.day);
+          } else {
+            due.textContent = 'fluid';
+          }
+          if (monthlyEditMode) {
+            due.style.cursor = 'pointer';
+            due.title = 'click to edit due — "day N", "fri/mon/...", "eom", "fluid"';
+            due.onclick = () => {
+              const currentStr = t.due.type === 'day' ? `day ${t.due.value}` : (t.due.type === 'weekday' ? t.due.value : t.due.type);
+              const newStr = prompt('due — "day N", "fri/mon/...", "eom", "fluid"', currentStr);
+              if (newStr === null) return;
+              m.weeks[wIdx].streams[sIdx].tasks[tIdx].due = parseDue(newStr);
+              saveMonthlyOrbit(m); renderMonthly();
+            };
+          }
+
+          row.appendChild(cb); row.appendChild(input); row.appendChild(due);
+
+          if (monthlyEditMode) {
+            const del = document.createElement('button');
+            del.className = 'monthly-task-del';
+            del.innerHTML = '×';
+            del.style.color = 'var(--faint)';
+            del.onclick = () => { m.weeks[wIdx].streams[sIdx].tasks.splice(tIdx, 1); saveMonthlyOrbit(m); renderMonthly(); };
+            row.appendChild(del);
+          }
+
+          tasksList.appendChild(row);
+        });
+      });
+
+      block.appendChild(tasksList);
+
+      if (monthlyEditMode) {
+        const addInput = document.createElement('input');
+        addInput.className = 'monthly-add-task';
+        addInput.placeholder = '+ add task (enter)';
+        addInput.onkeydown = (e) => {
+          if (e.key !== 'Enter') return;
+          const val = e.target.value.trim();
+          if (!val) return;
+          const dueStr = prompt('due — "day N", "fri/mon/...", "eom", "fluid"', 'fluid');
+          if (dueStr === null) return;
+          const newId = `w${w.num}-c${Date.now()}`;
+          m.weeks[wIdx].streams[sIdx].tasks.push({ id: newId, text: val, due: parseDue(dueStr) });
+          saveMonthlyOrbit(m); renderMonthly();
+        };
+        block.appendChild(addInput);
+      }
+
+      body.appendChild(block);
+    });
+
+    if (monthlyEditMode) {
+      const addStream = document.createElement('button');
+      addStream.className = 'monthly-add-btn';
+      addStream.textContent = '+ add stream';
+      addStream.onclick = () => {
+        const name = prompt('stream name?');
+        if (!name) return;
+        m.weeks[wIdx].streams.push({ name, tasks: [] });
+        saveMonthlyOrbit(m); renderMonthly();
+      };
+      body.appendChild(addStream);
+    }
+
+    acc.appendChild(body);
+    weeksContainer.appendChild(acc);
+  });
+
+  document.getElementById('monthlyActions').style.display = monthlyEditMode ? 'flex' : 'none';
+  document.getElementById('monthlyEditBtn').textContent = monthlyEditMode ? 'done' : 'edit';
 }
 
-// Hook monthly fire edit to its accordion header
-document.querySelector('#panel-baaaad .accordion-header').addEventListener('dblclick', () => {
-  fireEditMode = !fireEditMode;
-  renderMonthlyFire();
-});
-
-function addMonthlyFire(e) {
-  if (e.key !== 'Enter') return;
-  const val = e.target.value.trim();
-  if (!val) return;
-  monthlyFire.push({ name: val, status: 'next' });
-  saveMonthlyFire(); renderMonthlyFire();
-  e.target.value = '';
+function toggleMonthlyEdit() {
+  monthlyEditMode = !monthlyEditMode;
+  renderMonthly();
 }
 
-renderMonthlyFire();
+function shiftMonth(dir) {
+  viewedMonth += dir;
+  if (viewedMonth < 0) { viewedMonth = 11; viewedYear--; }
+  if (viewedMonth > 11) { viewedMonth = 0; viewedYear++; }
+  renderMonthly();
+}
+
+function resetMonthly() {
+  if (!confirm('Reset monthly orbit template to default? Custom tasks, streams, and edits will be lost. Tracker counts and task completions stay.')) return;
+  const current = loadMonthlyOrbit();
+  const fresh = JSON.parse(JSON.stringify(defaultMonthlyOrbit));
+  // preserve tracker counts
+  fresh.trackers.forEach(ft => {
+    const existing = current.trackers.find(ct => ct.id === ft.id);
+    if (existing) ft.current = existing.current;
+  });
+  S.set('monthlyOrbit', fresh);
+  renderMonthly();
+}
+
+renderMonthly();
 
 // ── FOCUS ITEMS ───────────────────────────────────────────────
-// Daily fields use date-keyed storage (same pattern as energy)
-// — no separate dailyDate check needed, yesterday's keys simply don't exist today
-
-// On a new day: carry tmrw-1/2/3 into today-1/2/3, then clear tmrw
 const prevTodayKey = 'today-keys-date';
 const lastTodayDate = S.get(prevTodayKey);
 if (lastTodayDate && lastTodayDate !== todayStr) {
-  // new day — carry tomorrow's three into today's date-keyed slots
   ['today-1','today-2','today-3'].forEach((id, i) => {
     const val = S.get('tmrw-' + (i+1)) || '';
     S.set(id + '-' + todayStr, val);
   });
-  // carry tmrw checkbox states into today's focusChecks
   const carriedChecks = S.get('tmrwChecks') || {};
   S.set('focusChecks-' + todayStr, carriedChecks);
   S.del('tmrwChecks');
-  // clear tomorrow's three
   ['tmrw-1','tmrw-2','tmrw-3'].forEach(k => S.del(k));
-  // clear unpinned upcoming
   const cu = S.get('upcoming') || [];
   const pinned = cu.filter(u => u.pinned);
   S.set('upcoming', pinned.length ? pinned : [
@@ -1317,23 +1791,19 @@ if (lastTodayDate && lastTodayDate !== todayStr) {
     { type:'trip', text:'', pinned:false },
     { type:'meeting', text:'', pinned:false }
   ]);
-  // re-sync in-memory upcoming (it was loaded before this block ran) and re-render
   upcoming = S.get('upcoming');
   renderUpcoming();
 }
 S.set(prevTodayKey, todayStr);
 
-// Load today's three — values loaded via renderDailyFields() below
 ['today-1','today-2','today-3'].forEach(id => {
   const el = document.getElementById(id);
   el.addEventListener('input', () => {
-    if (viewedDayIdx !== new Date().getDay()) return; // only write when viewing today
+    if (viewedDayIdx !== new Date().getDay()) return;
     S.set(id + '-' + todayStr, el.value);
   });
 });
 
-// Tomorrow's three — no date key, single persistent slot for "tomorrow from now"
-// Values are loaded via renderDailyFields(); handlers only save when viewing today
 ['tmrw-1','tmrw-2','tmrw-3'].forEach(id => {
   const el = document.getElementById(id);
   el.addEventListener('input', () => {
@@ -1342,11 +1812,9 @@ S.set(prevTodayKey, todayStr);
   });
 });
 
-// Focus checks — today-focus is date-keyed, tmrw-focus persists until new day
 function toggleFocus(checkEl) {
   const item = checkEl.parentElement;
   const isTmrw = item.classList.contains('tmrw-focus');
-  // tmrw checks are always editable; today checks only when viewing today
   if (!isTmrw && viewedDayIdx !== new Date().getDay()) return;
   item.classList.toggle('done');
   const selector = isTmrw ? '.tmrw-focus' : '.today-focus';
@@ -1356,102 +1824,6 @@ function toggleFocus(checkEl) {
   });
   S.set(isTmrw ? 'tmrwChecks' : 'focusChecks-' + todayStr, checks);
 }
-
-// ── TABS ─────────────────────────────────────────────────────
-function switchTab(id, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('panel-' + id).classList.add('active');
-}
-
-// ── ACCORDION ────────────────────────────────────────────────
-function toggleAcc(header) { header.parentElement.classList.toggle('open'); }
-
-// ── TASKS ────────────────────────────────────────────────────
-const defaultTasks = {
-  'tl-botanica': ['botanica page — copywriting','botanica offerings — finalize'],
-  'tl-expand': ['expand page — copywriting (blocked: offerings list)'],
-  'tl-awaken': ['awaken page — copywriting','laeliazine — types of newsletters + frequency','laeliazine — write practice energy forecast','laeliazine — pitch deck','laeliazine — contribution form','chakra writeups (7) — cross: botanica + baaaad.fm'],
-  'tl-learn': ['learn page — copywriting','reiki I curriculum','reiki II curriculum','reiki master curriculum'],
-  'tl-sd': ['draft business plans','transcribe research notebooks (storage trip first)','fill out content strategy document','transcribe female nervous system webinar notes'],
-  'tl-cs': ['become a client page — expand outline','client success page — copywriting'],
-  'tl-events': ['Blonde listening party','book event research','Serato computer library (pending budget)'],
-  'tl-ops': ['opportunities page — copywriting','privacy policy','terms & conditions','LLC renewal','group chat updates + intro (pre-launch)'],
-  'tl-funding': ['investor deck','sponsors deck','edit/add to intro deck','find people to pitch','create yearly budget spreadsheet'],
-  'tl-design': ['chakra infographic design (7 graphics)','create sphere logos // informative graphics','create event poster template','create offerings graphic template','business cards','branded invoice template'],
-  'tl-writeups': ['abril 2026 writeup','chakra playlist project writeup (7)','memoirs of a crash out writeup'],
-  'tl-chakra': ['cover art — 7 graphics (chakra colors, baaaad.fm template)','practice energy forecast reading (cross: tarot/oracle)'],
-  'tl-editorial': ['re-introduce the blog'],
-  'tl-bg-ops': ['camera roll deep organization','rewrite artist bios','create a portfolio in Notion','five year plan','bookmarked articles/vids','organize & read saved posts across socials','vocabulary project','finish poetry journal'],
-  'tl-bg-videos': ['imperfection in characters & stories pt. 1 (Gossip Girl)','imperfection in characters & stories pt. 2 (The Little Prince)','imperfection in characters & stories pt. 3 (Wicked)','Michigan trip','MSI recap'],
-  'tl-bg-photos': ['post bodysuit photoshoot','post NYC throwback (2019)','new photoshoot','Michigan trip photos'],
-  'tl-bg-music': ['princesa speaking budget spreadsheet','record voice memo demos','msg Classick'],
-  'tl-bg-photo': ['organize photography folders','Chairs','Faces','Stark//scapes'],
-  'tl-bg-art': ['explore print website for wholesale','order samples','decide on paper','create a wholesale shop','choose pieces to sell in bulk'],
-  'tl-bg-solo': ['finish photography projects','choose highlight photos','find a venue/collaborator','name the show','write necessary copy'],
-  'tl-bg-books': ['Lighters, men, & other things i left behind','365','YA series','Untitled novel','The trenches: ghost stories from...'],
-  'tl-bg-tvfilm': ['Wanted (film)','Barrios (TV pilot)'],
-  'tl-bg-substack': ['write post from drafted ideas'],
-  'tl-bg-acting': ['prepare audition (headshot · resume · monologue book)'],
-  'tl-home': ['find a psychiatrist','pap smear','dentist','storage trip','notarize $$ forms','seasonings project']
-};
-
-function makeTask(listId, text, done) {
-  const row = document.createElement('div');
-  row.className = 'task' + (done ? ' done' : '');
-
-  const cb = document.createElement('div');
-  cb.className = 'task-checkbox';
-  cb.onclick = () => { row.classList.toggle('done'); saveTasks(listId); };
-
-  const input = document.createElement('input');
-  input.className = 'task-name';
-  input.value = text;
-  input.oninput = () => saveTasks(listId);
-  input.onclick = e => e.stopPropagation();
-
-  const del = document.createElement('button');
-  del.className = 'task-del';
-  del.innerHTML = '×';
-  del.onclick = e => { e.stopPropagation(); row.remove(); saveTasks(listId); };
-
-  row.appendChild(cb); row.appendChild(input); row.appendChild(del);
-  return row;
-}
-
-function saveTasks(listId) {
-  const list = document.getElementById(listId);
-  if (!list) return;
-  const tasks = Array.from(list.querySelectorAll('.task')).map(t => ({
-    text: t.querySelector('.task-name').value,
-    done: t.classList.contains('done')
-  }));
-  S.set(listId, tasks);
-}
-
-function loadTasks(listId) {
-  const list = document.getElementById(listId);
-  if (!list) return;
-  const saved = S.get(listId);
-  // Fall back to defaults if no data OR data is an empty array (self-heal from bad state)
-  const tasks = (Array.isArray(saved) && saved.length > 0)
-    ? saved
-    : (defaultTasks[listId] || []).map(t => ({ text:t, done:false }));
-  tasks.forEach(t => list.appendChild(makeTask(listId, t.text, t.done)));
-}
-
-function addTask(e, listId) {
-  if (e.key !== 'Enter') return;
-  const val = e.target.value.trim();
-  if (!val) return;
-  const list = document.getElementById(listId);
-  list.appendChild(makeTask(listId, val, false));
-  saveTasks(listId);
-  e.target.value = '';
-}
-
-Object.keys(defaultTasks).forEach(loadTasks);
 
 // ── BRAIN DUMP ────────────────────────────────────────────────
 const brainEl = document.getElementById('brainDump');
@@ -1479,21 +1851,12 @@ morningReflectEl.addEventListener('input', () => {
 });
 
 // ── RENDER DAILY FIELDS ───────────────────────────────────────
-// Single source of truth — reads every daily field from the currently
-// viewed date. Called on load and whenever the pips change.
-// Writes always go to real todayStr via the input handlers above, which
-// short-circuit when not viewing today (so past/future days are read-only).
 function renderDailyFields() {
   const d = getViewedDateStr();
   const realDay = new Date().getDay();
   const isToday = viewedDayIdx === realDay;
-  // "real tomorrow" = the pip that is exactly one day after the real today
   const isRealTomorrow = viewedDayIdx === ((realDay + 1) % 7);
 
-  // today's three
-  //   - viewing today: show today-N-[todayStr] (normal)
-  //   - viewing real tomorrow: show tmrw-N values (preview of what today will become)
-  //   - viewing any other day: show that day's stored today-N-[dateStr] (blank if nothing)
   ['today-1','today-2','today-3'].forEach((id, idx) => {
     const el = document.getElementById(id);
     if (isRealTomorrow) {
@@ -1504,16 +1867,12 @@ function renderDailyFields() {
     el.readOnly = !isToday;
   });
 
-  // tomorrow's three
-  //   - viewing today: show the persistent tmrw-N values (editable)
-  //   - viewing any other day: blank (we don't track day-after-tomorrow)
   ['tmrw-1','tmrw-2','tmrw-3'].forEach(id => {
     const el = document.getElementById(id);
     el.value = isToday ? (S.get(id) || '') : '';
     el.readOnly = !isToday;
   });
 
-  // textareas
   const fields = [
     ['brainDump',      'brainDump-'],
     ['eodReflect',     'eodReflect-'],
@@ -1526,45 +1885,35 @@ function renderDailyFields() {
     el.readOnly = !isToday;
   });
 
-  // today focus checkboxes (date-keyed)
   const savedChecks = S.get('focusChecks-' + d) || {};
   document.querySelectorAll('.today-focus').forEach((item,i) => {
     item.classList.toggle('done', !!savedChecks[i]);
   });
 
-  // tmrw focus checkboxes (persist until new day, independent of viewed date)
   const savedTmrwChecks = S.get('tmrwChecks') || {};
   document.querySelectorAll('.tmrw-focus').forEach((item,i) => {
     item.classList.toggle('done', !!savedTmrwChecks[i]);
   });
 
-  // mood tags
   const savedMoods = S.get('moods-' + d) || [];
   document.querySelectorAll('.mood-tag').forEach(tag => {
     tag.classList.toggle('selected', savedMoods.includes(tag.textContent));
   });
 
-  // Load the routine to update checkbox states for the viewed day
   loadRoutine();
 
-  // visual dim when viewing past/future
   document.body.classList.toggle('viewing-other-day', !isToday);
 }
 
-// Mood tags — loaded via renderDailyFields(), write only when viewing today
 function toggleMood(el) {
   if (viewedDayIdx !== new Date().getDay()) return;
   el.classList.toggle('selected');
   S.set('moods-' + todayStr, Array.from(document.querySelectorAll('.mood-tag.selected')).map(t => t.textContent));
 }
 
-// Initial load of all daily fields for today
 renderDailyFields();
 
 // ── STALE TAB GUARD ───────────────────────────────────────────
-// iPhone Chrome restores cached tabs without re-running the script.
-// When the tab becomes visible, if the real date has advanced since
-// page load, reload so todayStr refreshes and tmrw→today carryover runs.
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
   const nowStr = new Date().toDateString();
@@ -1578,7 +1927,6 @@ function clearDay() {
     alert('switch back to today before clearing.');
     return;
   }
-  // clear all date-keyed daily fields for today
   ['today-1','today-2','today-3'].forEach(id => S.del(id + '-' + todayStr));
   S.del('eodReflect-' + todayStr);
   S.del('eodLearn-' + todayStr);
@@ -1587,7 +1935,6 @@ function clearDay() {
   S.del('focusChecks-' + todayStr);
   S.del('moods-' + todayStr);
   S.del('routineChecks-' + todayStr);
-  // clear only unpinned upcoming
   upcoming = upcoming.filter(u => u.pinned);
   if (!upcoming.length) upcoming = [
     { type:'meeting', text:'', pinned:false },
@@ -1596,45 +1943,38 @@ function clearDay() {
   ];
   S.set('upcoming', upcoming);
   renderUpcoming();
-  // reset energy for today
   energyLevel = 0;
   energyHistory[todayStr] = 0;
   S.set('energyHistory', energyHistory);
-  // re-read all daily fields from storage (now empty for today)
   renderDailyFields();
   renderEnergy();
 }
 
 function clearWeek() {
-  if (!confirm('Clear the full week? This resets daily items like morning reflection, brain dump, EOD, energy, and mood tags for the whole week. Task lists, Current Sprint, Morning Routine items, and Intention stay.')) return;
-  
-  // Define what NOT to clear
+  if (!confirm('Clear the full week? This resets daily items like morning reflection, brain dump, EOD, energy, and mood tags for the whole week. Task lists, Current Sprint, Morning Routine items, Monthly Orbit, and Intention stay.')) return;
+
   const keepKeys = [
     'intention',
     'sprint',
-    'monthlyFire',
+    'monthlyOrbit',
     'upcoming',
-    'routineItems', // Keep the actual items in the morning routine list
-    // And all your tabbed task lists
-    'tl-botanica', 'tl-expand', 'tl-awaken', 'tl-learn', 'tl-sd', 'tl-cs', 'tl-events', 'tl-ops', 'tl-funding', 'tl-design',
-    'tl-writeups', 'tl-chakra', 'tl-editorial',
-    'tl-bg-ops', 'tl-bg-videos', 'tl-bg-photos', 'tl-bg-music', 'tl-bg-photo', 'tl-bg-art', 'tl-bg-solo', 'tl-bg-books', 'tl-bg-tvfilm', 'tl-bg-substack', 'tl-bg-acting',
-    'tl-home'
+    'routineItems'
   ];
+  const keepPrefixes = ['monthlyTaskComplete-'];
 
-  // Get everything currently in storage
   const currentStorage = {};
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     currentStorage[key] = localStorage.getItem(key);
   }
 
-  // Clear everything
   localStorage.clear();
 
-  // Put back only the items we want to keep
   keepKeys.forEach(key => {
-    if (currentStorage[key]) {
+    if (currentStorage[key]) localStorage.setItem(key, currentStorage[key]);
+  });
+  Object.keys(currentStorage).forEach(key => {
+    if (keepPrefixes.some(p => key.startsWith(p))) {
       localStorage.setItem(key, currentStorage[key]);
     }
   });
@@ -1642,9 +1982,6 @@ function clearWeek() {
   location.reload();
 }
 
-// Finally, populate the header. This must run AFTER all let/const init above
-// so that renderUpcoming/renderDailyFields (called from inside updateHeader)
-// don't hit temporal dead zone errors on `upcoming`, etc.
 updateHeader();
 </script>
 </body>
