@@ -820,6 +820,15 @@ let monthlyEditMode = false;
 let viewedMonth = realNow.getMonth();
 let viewedYear = realNow.getFullYear();
 
+// open-week state — survives re-renders, resets on reload / month switch
+let openWeeks = new Set();
+function initOpenWeeks() {
+  openWeeks.clear();
+  if (isViewedMonthReal()) {
+    openWeeks.add(getWeekForDay(realNow.getDate()));
+  }
+}
+
 function loadMonthlyOrbit() {
   let m = S.get('monthlyOrbit');
   if (!m || !Array.isArray(m.weeks)) m = JSON.parse(JSON.stringify(defaultMonthlyOrbit));
@@ -1101,8 +1110,9 @@ function renderMonthly() {
   m.weeks.forEach((w, wIdx) => {
     const range = getWeekRange(w.num, viewedYear, viewedMonth);
     const isCurrentWeek = isRealMonth && w.num === currentWeek;
+    const isOpen = openWeeks.has(w.num);
     const acc = document.createElement('div');
-    acc.className = 'week-accordion' + (isCurrentWeek ? ' current open' : '');
+    acc.className = 'week-accordion' + (isCurrentWeek ? ' current' : '') + (isOpen ? ' open' : '');
 
     const startDow = weekdayShort[new Date(viewedYear, viewedMonth, range[0]).getDay()];
     const endDow = weekdayShort[new Date(viewedYear, viewedMonth, range[1]).getDay()];
@@ -1120,7 +1130,13 @@ function renderMonthly() {
         <span class="week-accordion-arrow">▾</span>
       </div>
     `;
-    header.onclick = () => acc.classList.toggle('open');
+    header.onclick = () => {
+      if (acc.classList.toggle('open')) {
+        openWeeks.add(w.num);
+      } else {
+        openWeeks.delete(w.num);
+      }
+    };
     acc.appendChild(header);
 
     const body = document.createElement('div');
@@ -1288,6 +1304,7 @@ function shiftMonth(dir) {
   viewedMonth += dir;
   if (viewedMonth < 0) { viewedMonth = 11; viewedYear--; }
   if (viewedMonth > 11) { viewedMonth = 0; viewedYear++; }
+  initOpenWeeks();
   renderMonthly();
 }
 
@@ -1304,6 +1321,7 @@ function resetMonthly() {
   renderMonthly();
 }
 
+initOpenWeeks();
 renderMonthly();
 
 // ── FOCUS ITEMS ───────────────────────────────────────────────
