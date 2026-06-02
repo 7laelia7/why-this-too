@@ -814,6 +814,8 @@ const defaultMonthlyOrbit = {
 let monthlyEditMode = false;
 let viewedMonth = realNow.getMonth();
 let viewedYear = realNow.getFullYear();
+let openMonthlyWeeks = new Set();
+let currentRenderedMonthKey = "";
 
 function loadMonthlyOrbit() {
   let m = S.get('monthlyOrbit');
@@ -949,6 +951,14 @@ function renderMonthly() {
   const currentWeek = getWeekForDay(realDay);
   const mKey = monthKey();
   const completion = S.get('monthlyTaskComplete-' + mKey) || {};
+
+  if (currentRenderedMonthKey !== mKey) {
+    openMonthlyWeeks.clear();
+    currentRenderedMonthKey = mKey;
+    if (isRealMonth) {
+      openMonthlyWeeks.add(currentWeek);
+    }
+  }
 
   document.getElementById('monthLabel').textContent = `${months[viewedMonth].toLowerCase()} ${viewedYear}`;
   document.getElementById('monthToday').textContent = isRealMonth ? '' : `today: ${months[realNow.getMonth()].toLowerCase()} ${realDay}`;
@@ -1096,8 +1106,9 @@ function renderMonthly() {
   m.weeks.forEach((w, wIdx) => {
     const range = getWeekRange(w.num, viewedYear, viewedMonth);
     const isCurrentWeek = isRealMonth && w.num === currentWeek;
+    const isOpen = openMonthlyWeeks.has(w.num);
     const acc = document.createElement('div');
-    acc.className = 'week-accordion' + (isCurrentWeek ? ' current open' : '');
+    acc.className = 'week-accordion' + (isOpen ? ' open' : '') + (isCurrentWeek ? ' current' : '');
 
     const startDow = weekdayShort[new Date(viewedYear, viewedMonth, range[0]).getDay()];
     const endDow = weekdayShort[new Date(viewedYear, viewedMonth, range[1]).getDay()];
@@ -1115,7 +1126,14 @@ function renderMonthly() {
         <span class="week-accordion-arrow">▾</span>
       </div>
     `;
-    header.onclick = () => acc.classList.toggle('open');
+    header.onclick = () => {
+      acc.classList.toggle('open');
+      if (acc.classList.contains('open')) {
+        openMonthlyWeeks.add(w.num);
+      } else {
+        openMonthlyWeeks.delete(w.num);
+      }
+    };
     acc.appendChild(header);
 
     const body = document.createElement('div');
