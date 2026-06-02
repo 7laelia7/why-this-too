@@ -215,7 +215,7 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
     </div>
     <div class="energy-note" id="energyNote">tap to log</div>
   </div>
-</div>
+  </div>
 
 <!-- WEEKLY INTENTION -->
 <div class="intention-card fade fade-2">
@@ -268,12 +268,6 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
   <div class="sprint-items" id="sprintItems"></div>
   <div id="sprintAddRow" style="display:none; margin-bottom:0.5rem;">
     <input class="add-task" id="sprintAddInput" placeholder="+ add sprint item (enter)" onkeydown="addSprintItem(event)" style="font-family:'DM Mono',monospace;font-size:11px;border:1px dashed var(--border);border-radius:5px;padding:0.35rem 0.6rem;width:100%;background:transparent;color:var(--text);outline:none;">
-  </div>
-  <div class="progress-row">
-    <div class="progress-track">
-      <div class="progress-fill" id="sprintFill" style="width:35%"></div>
-    </div>
-    <div class="progress-label" id="sprintProgress">in progress</div>
   </div>
 </div>
 
@@ -428,13 +422,13 @@ function updateHeader() {
   const h = realNow.getHours();
   const isToday = viewedDayIdx === realDayIdx;
 
-  document.getElementById('orbitDay').textContent = `${d.day} | ${d.num} — the daily orbit`;
+  document.getElementById('orbitDay').textContent = `${d.day.toLowerCase()} | ${d.num} — the daily orbit`;
 
   if (isToday) {
-    document.getElementById('dateLine').textContent = `${months[realNow.getMonth()]} ${realNow.getDate()}, ${realNow.getFullYear()}`;
+    document.getElementById('dateLine').textContent = `${months[realNow.getMonth()].toLowerCase()} ${realNow.getDate()}, ${realNow.getFullYear()}`;
     document.getElementById('mantraLine').textContent = `${h < 12 ? 'good morning' : h < 17 ? 'good afternoon' : 'good evening'}, guava. ${d.mantra}`;
   } else {
-    document.getElementById('dateLine').textContent = d.day;
+    document.getElementById('dateLine').textContent = d.day.toLowerCase();
     document.getElementById('mantraLine').textContent = d.mantra;
   }
 
@@ -675,8 +669,9 @@ renderUpcoming();
 // ── SPRINT ────────────────────────────────────────────────────
 const defaultSprint = [
   { text:'laelia launch v4', status:'active' },
-  { text:'baaaad.fm — abril 2026', status:'active' },
-  { text:'baaaad.fm — mayo 2026', status:'next' }
+  { text:'baaaad.fm — mayo 2026', status:'done' },
+  { text:'baaaad.fm — junio 2026', status:'active' },
+  { text:'baaaad.fm — julio 2026', status:'next' }
 ];
 
 let sprintItems = S.get('sprint');
@@ -819,15 +814,6 @@ const defaultMonthlyOrbit = {
 let monthlyEditMode = false;
 let viewedMonth = realNow.getMonth();
 let viewedYear = realNow.getFullYear();
-
-// open-week state — survives re-renders, resets on reload / month switch
-let openWeeks = new Set();
-function initOpenWeeks() {
-  openWeeks.clear();
-  if (isViewedMonthReal()) {
-    openWeeks.add(getWeekForDay(realNow.getDate()));
-  }
-}
 
 function loadMonthlyOrbit() {
   let m = S.get('monthlyOrbit');
@@ -1110,9 +1096,8 @@ function renderMonthly() {
   m.weeks.forEach((w, wIdx) => {
     const range = getWeekRange(w.num, viewedYear, viewedMonth);
     const isCurrentWeek = isRealMonth && w.num === currentWeek;
-    const isOpen = openWeeks.has(w.num);
     const acc = document.createElement('div');
-    acc.className = 'week-accordion' + (isCurrentWeek ? ' current' : '') + (isOpen ? ' open' : '');
+    acc.className = 'week-accordion' + (isCurrentWeek ? ' current open' : '');
 
     const startDow = weekdayShort[new Date(viewedYear, viewedMonth, range[0]).getDay()];
     const endDow = weekdayShort[new Date(viewedYear, viewedMonth, range[1]).getDay()];
@@ -1130,13 +1115,7 @@ function renderMonthly() {
         <span class="week-accordion-arrow">▾</span>
       </div>
     `;
-    header.onclick = () => {
-      if (acc.classList.toggle('open')) {
-        openWeeks.add(w.num);
-      } else {
-        openWeeks.delete(w.num);
-      }
-    };
+    header.onclick = () => acc.classList.toggle('open');
     acc.appendChild(header);
 
     const body = document.createElement('div');
@@ -1304,7 +1283,6 @@ function shiftMonth(dir) {
   viewedMonth += dir;
   if (viewedMonth < 0) { viewedMonth = 11; viewedYear--; }
   if (viewedMonth > 11) { viewedMonth = 0; viewedYear++; }
-  initOpenWeeks();
   renderMonthly();
 }
 
@@ -1321,19 +1299,25 @@ function resetMonthly() {
   renderMonthly();
 }
 
-initOpenWeeks();
 renderMonthly();
 
 // ── FOCUS ITEMS ───────────────────────────────────────────────
 const prevTodayKey = 'today-keys-date';
 const lastTodayDate = S.get(prevTodayKey);
 if (lastTodayDate && lastTodayDate !== todayStr) {
-  ['today-1','today-2','today-3'].forEach((id, i) => {
-    const val = S.get('tmrw-' + (i+1)) || '';
-    S.set(id + '-' + todayStr, val);
-  });
-  const carriedChecks = S.get('tmrwChecks') || {};
-  S.set('focusChecks-' + todayStr, carriedChecks);
+  const lastD = new Date(lastTodayDate);
+  const currD = new Date(todayStr);
+  const diffDays = Math.round((currD - lastD) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 1) {
+    ['today-1','today-2','today-3'].forEach((id, i) => {
+      const val = S.get('tmrw-' + (i+1)) || '';
+      S.set(id + '-' + todayStr, val);
+    });
+    const carriedChecks = S.get('tmrwChecks') || {};
+    S.set('focusChecks-' + todayStr, carriedChecks);
+  }
+
   S.del('tmrwChecks');
   ['tmrw-1','tmrw-2','tmrw-3'].forEach(k => S.del(k));
   const cu = S.get('upcoming') || [];
