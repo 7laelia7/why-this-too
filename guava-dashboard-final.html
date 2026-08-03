@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>guava — daily orbit</title>
+<title>the daily orbit</title>
 <link rel="apple-touch-icon" href="the daily orbit-2.png">
+<link rel="icon" type="image/png" href="the daily orbit-2.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="daily orbit">
@@ -186,9 +187,6 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
 .clear-row{display:flex;gap:.5rem;margin-top:.85rem;padding-top:.75rem;border-top:1px solid var(--border-soft)}
 .clear-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .75rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
 .clear-btn:hover{border-color:var(--pink);color:var(--pink-text)}
-.links{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem}
-.link-btn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:.4rem .85rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;text-decoration:none;transition:all .2s;display:inline-block}
-.link-btn:hover{border-color:var(--text);color:var(--text)}
 </style>
 </head>
 <body>
@@ -359,16 +357,6 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
     <button class="clear-btn" onclick="clearDay()">clear the day</button>
     <button class="clear-btn" onclick="clearWeek()">clear the week</button>
   </div>
-</div>
-
-<!-- QUICK LINKS -->
-<div class="section-label fade fade-6" style="margin-bottom:0.6rem">
-  <span class="label-dot" style="background:var(--faint)"></span>open in
-</div>
-<div class="links fade fade-6">
-  <a class="link-btn" href="https://notion.so" target="_blank">Notion</a>
-  <a class="link-btn" href="https://app.asana.com" target="_blank">Asana</a>
-  <a class="link-btn" href="https://calendar.google.com" target="_blank">Calendar</a>
 </div>
 
 <script>
