@@ -10,6 +10,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="daily orbit">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{--bg:#0e0c0a;--surface:#161310;--card:#1c1814;--card-hover:#221e19;--border:#2e2820;--border-soft:#261f18;--text:#f0ebe2;--text-dim:#c8c0b0;--muted:#8a8070;--faint:#4a4035;--green:#5a9e70;--green-dim:#1a3a28;--green-text:#8ecca0;--plum:#a07ab0;--plum-dim:#2e1e40;--plum-text:#c8a8e0;--pink:#d8788a;--pink-dim:#3a1825;--pink-text:#f0a0b0;--gold:#d4aa58;--gold-dim:#2e2208;--gold-text:#f0cc80;--blue:#6a8fc0;--blue-dim:#142030;--blue-text:#90b8e8;--done:#3a3530;--done-text:#5a5248}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -185,6 +187,10 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
 .mood-tag{font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .2s}
 .mood-tag.selected{background:var(--plum);color:var(--text);border-color:var(--plum)}
 .clear-row{display:flex;gap:.5rem;margin-top:.85rem;padding-top:.75rem;border-top:1px solid var(--border-soft)}
+.snapshot-btn{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:.6rem 1rem;border-radius:10px;border:1px solid var(--plum);background:var(--plum-dim);color:var(--plum-text);cursor:pointer;margin-bottom:1.25rem;transition:all .2s}
+.snapshot-btn:hover{background:var(--plum);color:var(--text)}
+.snapshot-btn:disabled{opacity:.6;cursor:default}
+.snapshot-btn svg{width:14px;height:14px;flex-shrink:0}
 .clear-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .75rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
 .clear-btn:hover{border-color:var(--pink);color:var(--pink-text)}
 .copy-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
@@ -377,6 +383,10 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
   </div>
   <div class="orbit-prompt" id="eodPrompt"></div>
   <textarea class="eod-area" id="eodReflect" placeholder="sit with it…"></textarea>
+  <button class="snapshot-btn" id="snapshotBtn" onclick="saveDaySnapshot(this)" style="margin-top:0.5rem;margin-bottom:0;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+    save today's snapshot
+  </button>
   <div class="clear-row">
     <button class="clear-btn" onclick="clearDay()">clear the day</button>
     <button class="clear-btn" onclick="clearWeek()">clear the week</button>
@@ -1506,6 +1516,126 @@ function fallbackCopy(el, cb) {
   try { document.execCommand('copy'); } catch (e) {}
   el.readOnly = wasReadOnly;
   cb();
+}
+
+// ── DAY SNAPSHOT PDF ──────────────────────────────────────────
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/\n/g,'<br>');
+}
+
+function buildSnapshotEl() {
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:absolute;left:-9999px;top:0;width:720px;padding:44px 40px;background:#0e0c0a;color:#f0ebe2;font-family:"DM Mono",monospace;';
+
+  const d = orbit[viewedDayIdx];
+  const dateText = document.getElementById('dateLine').textContent;
+  const mantraText = document.getElementById('mantraLine').textContent;
+  const energyNote = document.getElementById('energyNote').textContent;
+  const intention = document.getElementById('weeklyIntention').value || '—';
+
+  const todayThree = ['today-1','today-2','today-3'].map(id => {
+    const el = document.getElementById(id);
+    const done = el.closest('.focus-item').classList.contains('done');
+    return { text: el.value || '(empty)', done };
+  });
+  const tmrwThree = ['tmrw-1','tmrw-2','tmrw-3'].map(id => {
+    const el = document.getElementById(id);
+    return { text: el.value || '(empty)' };
+  });
+
+  const morningPrompt = document.getElementById('morningPrompt').textContent;
+  const morningReflect = document.getElementById('morningReflect').value || '—';
+  const brainDump = document.getElementById('brainDump').value || '—';
+  const eodLearn = document.getElementById('eodLearn').value || '—';
+  const eodPrompt = document.getElementById('eodPrompt').textContent;
+  const eodReflect = document.getElementById('eodReflect').value || '—';
+  const moods = Array.from(document.querySelectorAll('.mood-tag.selected')).map(t => t.textContent);
+  const upcomingToday = upcoming.filter(u => u.text).map(u => `${u.type}: ${u.text}`);
+  const sprintActive = sprintItems.filter(s => s.status === 'active').map(s => s.text);
+
+  function section(title, color, bodyHtml) {
+    return `<div style="margin-bottom:20px;padding:18px 20px;border-radius:10px;background:#1c1814;border:1px solid #2e2820;">
+      <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:${color};margin-bottom:10px;">${title}</div>
+      ${bodyHtml}
+    </div>`;
+  }
+
+  wrap.innerHTML = `
+    <div style="margin-bottom:26px;">
+      <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8a8070;">${escapeHtml(d.day.toLowerCase())} | ${d.num} — the daily orbit</div>
+      <div style="font-family:'Playfair Display',serif;font-size:30px;font-weight:500;color:#f0ebe2;margin:4px 0 6px;">${escapeHtml(dateText)}</div>
+      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:#c8a8e0;margin-bottom:10px;">${escapeHtml(mantraText)}</div>
+      <div style="font-size:11px;color:#8a8070;">energy: ${escapeHtml(energyNote)}</div>
+    </div>
+
+    ${section('weekly intention', '#c8a8e0', `<div style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;">${escapeHtml(intention)}</div>`)}
+
+    ${section("today's three", '#8ecca0', todayThree.map((t,i) => `<div style="padding:6px 0;font-size:13px;${t.done ? 'text-decoration:line-through;color:#5a5248;' : ''}">${i+1}. ${escapeHtml(t.text)}</div>`).join(''))}
+
+    ${section('morning reflection', '#c8a8e0', `<div style="font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#c8a8e0;margin-bottom:8px;">${escapeHtml(morningPrompt)}</div><div style="font-size:13px;">${escapeHtml(morningReflect)}</div>`)}
+
+    ${upcomingToday.length ? section('upcoming', '#90b8e8', upcomingToday.map(u => `<div style="font-size:13px;padding:4px 0;">${escapeHtml(u)}</div>`).join('')) : ''}
+
+    ${sprintActive.length ? section('current sprint — active', '#8ecca0', sprintActive.map(s => `<div style="font-size:13px;padding:4px 0;">${escapeHtml(s)}</div>`).join('')) : ''}
+
+    ${section('brain dump', '#f0cc80', `<div style="font-size:13px;">${escapeHtml(brainDump)}</div>`)}
+
+    ${section("tomorrow's three", '#8ecca0', tmrwThree.map((t,i) => `<div style="padding:6px 0;font-size:13px;">${i+1}. ${escapeHtml(t.text)}</div>`).join(''))}
+
+    ${section('what did i learn today?', '#c8a8e0', `<div style="font-size:13px;margin-bottom:10px;">${escapeHtml(eodLearn)}</div>${moods.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;">${moods.map(m => `<span style="font-size:10px;padding:3px 10px;border-radius:20px;background:#a07ab0;color:#f0ebe2;">${escapeHtml(m)}</span>`).join('')}</div>` : ''}`)}
+
+    ${section("tomorrow's prompt", '#c8a8e0', `<div style="font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#c8a8e0;margin-bottom:8px;">${escapeHtml(eodPrompt)}</div><div style="font-size:13px;">${escapeHtml(eodReflect)}</div>`)}
+  `;
+
+  return wrap;
+}
+
+async function saveDaySnapshot(btn) {
+  if (typeof html2canvas === 'undefined' || !window.jspdf) {
+    alert('PDF tools are still loading — give it a second and try again.');
+    return;
+  }
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = 'generating…';
+
+  const snap = buildSnapshotEl();
+  document.body.appendChild(snap);
+
+  try {
+    const canvas = await html2canvas(snap, { backgroundColor: '#0e0c0a', scale: 2, useCORS: true });
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const imgData = canvas.toDataURL('image/png');
+
+    let heightLeft = imgHeight;
+    let position = 0;
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    const dateLabel = (document.getElementById('dateLine').textContent || todayStr)
+      .replace(/,/g, '').replace(/\s+/g, '-').toLowerCase();
+    pdf.save(`daily-orbit-${dateLabel}.pdf`);
+  } catch (err) {
+    console.error(err);
+    alert('Could not generate the PDF — try again.');
+  } finally {
+    document.body.removeChild(snap);
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
 }
 
 // ── STALE TAB GUARD ───────────────────────────────────────────
