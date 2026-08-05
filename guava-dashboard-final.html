@@ -187,6 +187,12 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
 .clear-row{display:flex;gap:.5rem;margin-top:.85rem;padding-top:.75rem;border-top:1px solid var(--border-soft)}
 .clear-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .75rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
 .clear-btn:hover{border-color:var(--pink);color:var(--pink-text)}
+.copy-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.copy-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:2px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .2s,transform .15s}
+.copy-btn svg{width:14px;height:14px}
+.copy-btn:hover{color:var(--text)}
+.copy-btn:active{transform:scale(.9)}
+.copy-btn.copied{color:var(--green-text)}
 </style>
 </head>
 <body>
@@ -239,7 +245,12 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
 
 <!-- MORNING REFLECTION -->
 <div class="card fade fade-2" style="border-color: #4a2870; background: var(--plum-dim);">
-  <span class="morning-label" style="font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--plum-text); margin-bottom:0.4rem; display:block;">morning reflection</span>
+  <div class="copy-row" style="margin-bottom:0.4rem;">
+    <span class="morning-label" style="font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--plum-text); display:block; margin-bottom:0;">morning reflection</span>
+    <button class="copy-btn" onclick="copyText('morningReflect', this)" title="copy" aria-label="copy morning reflection">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    </button>
+  </div>
   <div class="morning-prompt" id="morningPrompt"></div>
   <textarea class="morning-area" id="morningReflect" placeholder="write your response…"></textarea>
 </div>
@@ -282,8 +293,11 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
 
 <!-- BRAIN DUMP -->
 <div class="card fade fade-5">
-  <div class="section-label" style="margin-bottom:0.5rem">
-    <span class="label-dot" style="background:var(--gold-text)"></span>brain dump
+  <div class="section-label copy-row" style="margin-bottom:0.5rem">
+    <span style="display:flex;align-items:center;gap:0.5rem;"><span class="label-dot" style="background:var(--gold-text)"></span>brain dump</span>
+    <button class="copy-btn" onclick="copyText('brainDump', this)" title="copy" aria-label="copy brain dump">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    </button>
   </div>
   <textarea class="brain-area" id="brainDump" placeholder="what's looping in your head right now… get it out of there"></textarea>
 </div>
@@ -336,7 +350,12 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
   <div class="section-label" style="margin-bottom:0.75rem">
     <span class="label-dot" style="background:var(--plum-text)"></span>end of day
   </div>
-  <div class="learn-prompt">what did i learn today?</div>
+  <div class="copy-row">
+    <div class="learn-prompt" style="margin:0;">what did i learn today?</div>
+    <button class="copy-btn" onclick="copyText('eodLearn', this)" title="copy" aria-label="copy what i learned today">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    </button>
+  </div>
   <textarea class="eod-area" id="eodLearn" placeholder="write it down…"></textarea>
   <div class="learn-prompt" style="margin-top:0.5rem;">how am i landing?</div>
   <div class="mood-tags" id="moodTags">
@@ -350,7 +369,12 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
     <div class="mood-tag" onclick="toggleMood(this)">heavy</div>
     <div class="mood-tag" onclick="toggleMood(this)">light</div>
   </div>
-  <div class="learn-prompt" style="margin-top:1rem;">tomorrow's prompt</div>
+  <div class="copy-row" style="margin-top:1rem;">
+    <div class="learn-prompt" style="margin:0;">tomorrow's prompt</div>
+    <button class="copy-btn" onclick="copyText('eodReflect', this)" title="copy" aria-label="copy tomorrow's prompt reflection">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    </button>
+  </div>
   <div class="orbit-prompt" id="eodPrompt"></div>
   <textarea class="eod-area" id="eodReflect" placeholder="sit with it…"></textarea>
   <div class="clear-row">
@@ -1459,6 +1483,30 @@ function toggleMood(el) {
 }
 
 renderDailyFields();
+
+// ── COPY TO CLIPBOARD ────────────────────────────────────────
+function copyText(id, btn) {
+  const el = document.getElementById(id);
+  const text = el.value || '';
+  const showCopied = () => {
+    btn.classList.add('copied');
+    setTimeout(() => btn.classList.remove('copied'), 1200);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(showCopied).catch(() => fallbackCopy(el, showCopied));
+  } else {
+    fallbackCopy(el, showCopied);
+  }
+}
+function fallbackCopy(el, cb) {
+  const wasReadOnly = el.readOnly;
+  el.readOnly = false;
+  el.focus();
+  el.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  el.readOnly = wasReadOnly;
+  cb();
+}
 
 // ── STALE TAB GUARD ───────────────────────────────────────────
 document.addEventListener('visibilitychange', () => {
