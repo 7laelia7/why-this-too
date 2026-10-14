@@ -527,14 +527,44 @@ const intentionEl = document.getElementById('weeklyIntention');
 intentionEl.value = S.get('intention') || '';
 intentionEl.addEventListener('input', () => S.set('intention', intentionEl.value));
 
+// new week (sunday): clear last week's intention, same way a new day is detected below
+const thisWeekKey = weekStart.toDateString();
+const lastIntentionWeek = S.get('intention-week');
+if (lastIntentionWeek && lastIntentionWeek !== thisWeekKey) {
+  S.del('intention');
+  intentionEl.value = '';
+}
+S.set('intention-week', thisWeekKey);
+
 // ── MORNING ROUTINE ──────────────────────────────────────────
 const defaultRoutine = [
-  { text:'self care checklist', done:false },
+  { text:'self love daily checklist', done:false },
+  { text:'morning pages', done:false },
   { text:'planner', done:false },
   { text:'the daily orbit', done:false },
   { text:'board of directors check-in', done:false },
   { text:'Asana check-in', done:false }
 ];
+
+// rename in a saved routine list (runs safely every load)
+(function migrateRoutine() {
+  const saved = S.get('routineItems');
+  if (!Array.isArray(saved)) return;
+  const i = saved.findIndex(it => it && it.text === 'self care checklist');
+  if (i === -1) return;
+  saved[i].text = 'self love daily checklist';
+  if (!saved.some(it => it && it.text === 'morning pages')) {
+    saved.splice(i + 1, 0, { text: 'morning pages' });
+    // checks are saved by position: shift today's checks so they stay on the right items
+    const ck = S.get('routineChecks-' + todayStr);
+    if (ck) {
+      const shifted = {};
+      Object.keys(ck).forEach(k => { const n = parseInt(k); shifted[n > i ? n + 1 : n] = ck[k]; });
+      S.set('routineChecks-' + todayStr, shifted);
+    }
+  }
+  S.set('routineItems', saved);
+})();
 
 let routineEditMode = false;
 
@@ -761,7 +791,11 @@ renderSprint();
 const weekdayMap = { sun:0, mon:1, tue:2, wed:3, thu:4, fri:5, sat:6 };
 const weekdayShort = ['sun','mon','tue','wed','thu','fri','sat'];
 
+// layoutVersion: bump when the default weeks/headings change so saved copies update once
+const MONTHLY_LAYOUT_VERSION = 4;
+
 const defaultMonthlyOrbit = {
+  layoutVersion: MONTHLY_LAYOUT_VERSION,
   trackers: [
     { id: 'reading',    label: 'reading',    current: 0, target: 15, period: 'yr' },
     { id: 'coursework', label: 'coursework', current: 0, target: 3,  period: 'wk' }
@@ -769,12 +803,12 @@ const defaultMonthlyOrbit = {
   weeks: [
     { num: 1, theme: 'discover + orient · intent setting', emoji: '🌌',
       streams: [
-        { name: 'cosmic alignment check-in', tasks: [
+        { name: 'energy readings', tasks: [
           { id: 'w1-c1', text: 'laelia',     due: { type:'day', value:5 } },
           { id: 'w1-c2', text: 'baaaad.fm',  due: { type:'day', value:5 } },
           { id: 'w1-c3', text: 'baby guava', due: { type:'day', value:5 } }
         ]},
-        { name: 'baaaad.fm monthly playlist', tasks: [
+        { name: 'baaaad.fm', tasks: [
           { id: 'w1-p1', text: 'make playlists public',              due: { type:'day', value:1 } },
           { id: 'w1-p2', text: 'story & feed graphic',               due: { type:'day', value:1 } },
           { id: 'w1-p3', text: 'promote baby guava music platforms', due: { type:'day', value:2 } }
@@ -786,10 +820,8 @@ const defaultMonthlyOrbit = {
       ]},
     { num: 2, theme: 'listen + generate · workflow alignment', emoji: '🎧',
       streams: [
-        { name: 'baaaad.fm monthly playlist', tasks: [
-          { id: 'w2-p1', text: 'add links to Spotify, YouTube, & Apple Music', due: { type:'day', value:7 } }
-        ]},
-        { name: 'baaaad.fm promo retrospective', tasks: [
+        { name: 'baaaad.fm', tasks: [
+          { id: 'w2-p1', text: 'add links to Spotify, YouTube, & Apple Music', due: { type:'day', value:7 } },
           { id: 'w2-r1', text: 'promote last month\'s write up', due: { type:'weekday', value:'fri' } }
         ]},
         { name: 'goal commitments', tasks: [
@@ -799,14 +831,10 @@ const defaultMonthlyOrbit = {
       ]},
     { num: 3, theme: 'document + shape · asset curation', emoji: '✍️',
       streams: [
-        { name: 'baaaad.fm monthly playlist', tasks: [
+        { name: 'baaaad.fm', tasks: [
           { id: 'w3-p1', text: 'energy read for writeup',  due: { type:'day', value:14 } },
-          { id: 'w3-p2', text: 'playlist overview graphic', due: { type:'day', value:15 } }
-        ]},
-        { name: 'baaaad.fm concept drafting', tasks: [
-          { id: 'w3-d1', text: 'draft concept based on reading & whim', due: { type:'day', value:21 } }
-        ]},
-        { name: 'baaaad.fm promo retrospective', tasks: [
+          { id: 'w3-p2', text: 'playlist overview graphic', due: { type:'day', value:15 } },
+          { id: 'w3-d1', text: 'draft concept based on reading & whim', due: { type:'day', value:21 } },
           { id: 'w3-r1', text: 'promote last month\'s write up', due: { type:'weekday', value:'fri' } }
         ]},
         { name: 'goal commitments', tasks: [
@@ -816,19 +844,18 @@ const defaultMonthlyOrbit = {
       ]},
     { num: 4, theme: 'release + attunement · digital zero sweep', emoji: '🪐',
       streams: [
-        { name: 'cosmic alignment reflection', tasks: [
+        { name: 'energy readings', tasks: [
           { id: 'w4-c1', text: 'laelia',     due: { type:'eom' } },
           { id: 'w4-c2', text: 'baaaad.fm',  due: { type:'eom' } },
           { id: 'w4-c3', text: 'baby guava', due: { type:'eom' } }
         ]},
-        { name: 'baaaad.fm monthly playlist', tasks: [
+        { name: 'baaaad.fm', tasks: [
           { id: 'w4-p2', text: 'finalize next month\'s playlist',                  due: { type:'day', value:22 } },
+          { id: 'w4-r1', text: 'promote last month\'s write up', due: { type:'weekday', value:'fri', skipIfDayAtLeast: 27 } },
           { id: 'w4-p3', text: 'edit, finalize, & publish writeup to Substack',   due: { type:'eom' } },
           { id: 'w4-p4', text: 'post across all socials',                         due: { type:'eom' } },
-          { id: 'w4-p5', text: 'mirror next month\'s playlist',                          due: { type:'eom' } }
-        ]},
-        { name: 'baaaad.fm promo retrospective', tasks: [
-          { id: 'w4-r1', text: 'promote last month\'s write up', due: { type:'weekday', value:'fri', skipIfDayAtLeast: 27 } }
+          { id: 'w4-p5', text: 'Songshift & TuneMyMusic',                          due: { type:'eom' } },
+          { id: 'w4-p6', text: 'organize camera roll',                            due: { type:'day', value:22 } }
         ]},
         { name: 'goal commitments', tasks: [
           { id: 'w4-g1', text: 'reading session',  due: { type:'fluid' } },
@@ -848,6 +875,14 @@ function loadMonthlyOrbit() {
   let m = S.get('monthlyOrbit');
   if (!m || !Array.isArray(m.weeks)) m = JSON.parse(JSON.stringify(defaultMonthlyOrbit));
   if (!Array.isArray(m.trackers)) m.trackers = JSON.parse(JSON.stringify(defaultMonthlyOrbit.trackers));
+
+  // one-time update to the new headings: swap in the new weeks, keep tracker counts
+  if (m.layoutVersion !== MONTHLY_LAYOUT_VERSION) {
+    const fresh = JSON.parse(JSON.stringify(defaultMonthlyOrbit));
+    m.weeks = fresh.weeks;
+    m.layoutVersion = MONTHLY_LAYOUT_VERSION;
+    S.set('monthlyOrbit', m);
+  }
 
   // Auto-reset trackers when their period boundary crosses
   let changed = false;
@@ -1206,12 +1241,16 @@ function renderMonthly() {
       const tasksList = document.createElement('div');
       tasksList.className = 'stream-tasks';
 
+      // gather each task's due date(s), then list them in due-date order (fluid last)
+      const entries = [];
       s.tasks.forEach((t, tIdx) => {
         const resolved = resolveDueDates(t.due, viewedYear, viewedMonth, range);
         const occurrences = resolved.length > 0 ? resolved : (t.due.type === 'fluid' ? [null] : []);
-        if (occurrences.length === 0) return;
+        occurrences.forEach(occ => entries.push({ t, tIdx, occ }));
+      });
+      entries.sort((a, b) => (a.occ ? a.occ.day : 999) - (b.occ ? b.occ.day : 999));
 
-        occurrences.forEach(occ => {
+      entries.forEach(({ t, tIdx, occ }) => {
           const taskId = occ ? `${t.id}-${occ.day}` : `${t.id}-fluid`;
           const isDone = !!completion[taskId];
           const isToday = occ && isRealMonth && occ.day === realDay;
@@ -1273,7 +1312,6 @@ function renderMonthly() {
           }
 
           tasksList.appendChild(row);
-        });
       });
 
       block.appendChild(tasksList);
@@ -1332,7 +1370,7 @@ function shiftMonth(dir) {
 }
 
 function resetMonthly() {
-  if (!confirm('Reset monthly orbit template to default? Custom tasks, streams, and edits will be lost. Tracker counts and task completions stay.')) return;
+  if (!confirm('reset monthly orbit template to default? custom tasks, streams, and edits will be lost. tracker counts and task completions stay.')) return;
   const current = loadMonthlyOrbit();
   const fresh = JSON.parse(JSON.stringify(defaultMonthlyOrbit));
   // preserve tracker counts
@@ -1630,7 +1668,7 @@ async function saveDaySnapshot(btn) {
     pdf.save(`daily-orbit-${dateLabel}.pdf`);
   } catch (err) {
     console.error(err);
-    alert('Could not generate the PDF — try again.');
+    alert('could not generate the PDF — try again.');
   } finally {
     document.body.removeChild(snap);
     btn.disabled = false;
@@ -1647,7 +1685,7 @@ document.addEventListener('visibilitychange', () => {
 
 // ── CLEAR ─────────────────────────────────────────────────────
 function clearDay() {
-  if (!confirm('Clear today\'s entries? Resets today\'s three, morning routine checks, morning reflection, brain dump, EOD, energy, mood tags, and unpinned meetings. Tasks and intention stay.')) return;
+  if (!confirm('clear today\'s entries? this resets today\'s three, morning routine, morning reflection, brain dump, end of day, energy, and unpinned upcoming. weekly intention, tomorrow\'s three, current sprint, and monthly orbit stay.')) return;
   if (viewedDayIdx !== new Date().getDay()) {
     alert('switch back to today before clearing.');
     return;
@@ -1676,10 +1714,9 @@ function clearDay() {
 }
 
 function clearWeek() {
-  if (!confirm('Clear the full week? This resets daily items like morning reflection, brain dump, EOD, energy, and mood tags for the whole week. Task lists, Current Sprint, Morning Routine items, Monthly Orbit, and Intention stay.')) return;
+  if (!confirm('clear the week? this resets weekly intention, today\'s three, tomorrow\'s three, morning routine checks, morning reflection, brain dump, end of day, and energy for the whole week. current sprint, morning routine items, upcoming, and monthly orbit stay.')) return;
 
   const keepKeys = [
-    'intention',
     'sprint',
     'monthlyOrbit',
     'upcoming',
