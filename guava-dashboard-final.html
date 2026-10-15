@@ -199,6 +199,15 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
 .copy-btn:hover{color:var(--text)}
 .copy-btn:active{transform:scale(.9)}
 .copy-btn.copied{color:var(--green-text)}
+.morning-area,.brain-area,.eod-area{overflow:hidden}
+.activity-list{display:flex;flex-direction:column}
+.activity-item{display:flex;align-items:flex-start;gap:.6rem;padding:.45rem 0;border-bottom:1px solid var(--border-soft)}
+.activity-item:last-child{border-bottom:none}
+.activity-time{font-size:10px;color:var(--gold-text);white-space:nowrap;flex-shrink:0;padding-top:3px;min-width:54px;letter-spacing:.04em}
+.activity-text{font-family:'DM Mono',monospace;font-size:12px;border:none;background:transparent;color:var(--text);flex:1;outline:none;resize:none;overflow:hidden;line-height:1.6;padding:0;min-width:0}
+.activity-text[readonly]{opacity:.55;cursor:default}
+.activity-item:hover .del-btn{color:var(--faint)}
+.activity-empty{font-size:11px;color:var(--faint);font-style:italic;padding:.3rem 0}
 </style>
 </head>
 <body>
@@ -306,6 +315,20 @@ body.viewing-other-day .mood-tag{opacity:.55;pointer-events:none}
     </button>
   </div>
   <textarea class="brain-area" id="brainDump" placeholder="what's looping in your head right now… get it out of there"></textarea>
+</div>
+
+<!-- ACTIVITY LOG -->
+<div class="card fade fade-5">
+  <div class="section-label copy-row" style="margin-bottom:0.5rem">
+    <span style="display:flex;align-items:center;gap:0.5rem;"><span class="label-dot" style="background:var(--gold-text)"></span>activity log</span>
+    <button class="copy-btn" onclick="copyActivity(this)" title="copy" aria-label="copy activity log">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    </button>
+  </div>
+  <div class="activity-list" id="activityList"></div>
+  <div id="activityAddRow" style="margin-top:0.4rem;">
+    <input id="activityAddInput" placeholder="+ add entry (enter)" onkeydown="addActivity(event)" style="font-family:'DM Mono',monospace;font-size:11px;border:1px dashed var(--border);border-radius:5px;padding:0.35rem 0.6rem;width:100%;background:transparent;color:var(--text);outline:none;">
+  </div>
 </div>
 
 <div class="divider fade fade-4"></div>
@@ -1451,6 +1474,96 @@ brainEl.addEventListener('input', () => {
   S.set('brainDump-' + todayStr, brainEl.value);
 });
 
+// ── ACTIVITY LOG ──────────────────────────────────────────────
+function activityKey() { return 'activityLog-' + getViewedDateStr(); }
+function getActivity() { const a = S.get(activityKey()); return Array.isArray(a) ? a : []; }
+function fmtTime(ts) { return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).toLowerCase(); }
+
+function renderActivity() {
+  const isToday = viewedDayIdx === new Date().getDay();
+  const list = document.getElementById('activityList');
+  list.innerHTML = '';
+  const key = activityKey();
+  const items = getActivity();
+
+  if (!items.length && !isToday) {
+    const empty = document.createElement('div');
+    empty.className = 'activity-empty';
+    empty.textContent = 'nothing logged';
+    list.appendChild(empty);
+  }
+
+  items.forEach((it, i) => {
+    const row = document.createElement('div');
+    row.className = 'activity-item';
+
+    const time = document.createElement('span');
+    time.className = 'activity-time';
+    time.textContent = fmtTime(it.ts);
+
+    const text = document.createElement('textarea');
+    text.className = 'activity-text';
+    text.rows = 1;
+    text.value = it.text;
+    text.readOnly = !isToday;
+    if (isToday) text.oninput = () => { items[i].text = text.value; S.set(key, items); autoGrow(text); };
+
+    const del = document.createElement('button');
+    del.className = 'del-btn';
+    del.innerHTML = '×';
+    if (isToday) del.onclick = () => { items.splice(i, 1); S.set(key, items); renderActivity(); };
+    else del.style.visibility = 'hidden';
+
+    row.appendChild(time); row.appendChild(text); row.appendChild(del);
+    list.appendChild(row);
+    autoGrow(text);
+  });
+
+  document.getElementById('activityAddRow').style.display = isToday ? 'block' : 'none';
+}
+
+function addActivity(e) {
+  if (e.key !== 'Enter') return;
+  if (viewedDayIdx !== new Date().getDay()) return;
+  const val = e.target.value.trim();
+  if (!val) return;
+  const key = 'activityLog-' + todayStr;
+  const items = S.get(key) || [];
+  items.push({ ts: Date.now(), text: val });
+  S.set(key, items);
+  e.target.value = '';
+  renderActivity();
+  e.target.focus();
+}
+
+function copyActivity(btn) {
+  const text = getActivity().filter(a => a.text).map(a => fmtTime(a.ts) + ' — ' + a.text).join('\n');
+  const showCopied = () => { btn.classList.add('copied'); setTimeout(() => btn.classList.remove('copied'), 1200); };
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (err) {}
+    document.body.removeChild(ta); showCopied();
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(showCopied).catch(fallback);
+  else fallback();
+}
+
+// ── AUTO-GROWING TEXT BOXES ───────────────────────────────────
+function autoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight + (el.offsetHeight - el.clientHeight)) + 'px';
+}
+function growAll() {
+  ['morningReflect','brainDump','eodLearn','eodReflect'].forEach(id => autoGrow(document.getElementById(id)));
+  document.querySelectorAll('.activity-text').forEach(autoGrow);
+}
+['morningReflect','brainDump','eodLearn','eodReflect'].forEach(id => {
+  document.getElementById(id).addEventListener('input', e => autoGrow(e.target));
+});
+window.addEventListener('resize', growAll);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(growAll);
+
 // ── EOD ───────────────────────────────────────────────────────
 const eodReflectEl = document.getElementById('eodReflect');
 const eodLearnEl = document.getElementById('eodLearn');
@@ -1520,6 +1633,8 @@ function renderDailyFields() {
   });
 
   loadRoutine();
+  renderActivity();
+  growAll();
 
   document.body.classList.toggle('viewing-other-day', !isToday);
 }
@@ -1592,6 +1707,7 @@ function buildSnapshotEl() {
   const moods = Array.from(document.querySelectorAll('.mood-tag.selected')).map(t => t.textContent);
   const upcomingToday = upcoming.filter(u => u.text).map(u => `${u.type}: ${u.text}`);
   const sprintActive = sprintItems.filter(s => s.status === 'active').map(s => s.text);
+  const activityItems = getActivity().filter(a => a.text);
 
   function section(title, color, bodyHtml) {
     return `<div style="margin-bottom:20px;padding:18px 20px;border-radius:10px;background:#1c1814;border:1px solid #2e2820;">
@@ -1619,6 +1735,8 @@ function buildSnapshotEl() {
     ${sprintActive.length ? section('current sprint — active', '#8ecca0', sprintActive.map(s => `<div style="font-size:13px;padding:4px 0;">${escapeHtml(s)}</div>`).join('')) : ''}
 
     ${section('brain dump', '#f0cc80', `<div style="font-size:13px;">${escapeHtml(brainDump)}</div>`)}
+
+    ${activityItems.length ? section('activity log', '#f0cc80', activityItems.map(a => `<div style="font-size:13px;padding:4px 0;"><span style="color:#8a8070;font-size:11px;margin-right:10px;">${escapeHtml(fmtTime(a.ts))}</span>${escapeHtml(a.text)}</div>`).join('')) : ''}
 
     ${section("tomorrow's three", '#8ecca0', tmrwThree.map((t,i) => `<div style="padding:6px 0;font-size:13px;">${i+1}. ${escapeHtml(t.text)}</div>`).join(''))}
 
@@ -1685,7 +1803,7 @@ document.addEventListener('visibilitychange', () => {
 
 // ── CLEAR ─────────────────────────────────────────────────────
 function clearDay() {
-  if (!confirm('clear today\'s entries? this resets today\'s three, morning routine, morning reflection, brain dump, end of day, energy, and unpinned upcoming. weekly intention, tomorrow\'s three, current sprint, and monthly orbit stay.')) return;
+  if (!confirm('clear today\'s entries? this resets today\'s three, morning routine, morning reflection, brain dump, activity log, end of day, energy, and unpinned upcoming. weekly intention, tomorrow\'s three, current sprint, and monthly orbit stay.')) return;
   if (viewedDayIdx !== new Date().getDay()) {
     alert('switch back to today before clearing.');
     return;
@@ -1695,6 +1813,7 @@ function clearDay() {
   S.del('eodLearn-' + todayStr);
   S.del('brainDump-' + todayStr);
   S.del('morningReflect-' + todayStr);
+  S.del('activityLog-' + todayStr);
   S.del('focusChecks-' + todayStr);
   S.del('moods-' + todayStr);
   S.del('routineChecks-' + todayStr);
@@ -1714,7 +1833,7 @@ function clearDay() {
 }
 
 function clearWeek() {
-  if (!confirm('clear the week? this resets weekly intention, today\'s three, tomorrow\'s three, morning routine checks, morning reflection, brain dump, end of day, and energy for the whole week. current sprint, morning routine items, upcoming, and monthly orbit stay.')) return;
+  if (!confirm('clear the week? this resets weekly intention, today\'s three, tomorrow\'s three, morning routine checks, morning reflection, brain dump, activity log, end of day, and energy for the whole week. current sprint, morning routine items, upcoming, and monthly orbit stay.')) return;
 
   const keepKeys = [
     'sprint',
