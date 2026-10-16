@@ -10,7 +10,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="daily orbit">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{--bg:#0e0c0a;--surface:#161310;--card:#1c1814;--card-hover:#221e19;--border:#2e2820;--border-soft:#261f18;--text:#f0ebe2;--text-dim:#c8c0b0;--muted:#8a8070;--faint:#4a4035;--green:#5a9e70;--green-dim:#1a3a28;--green-text:#8ecca0;--plum:#a07ab0;--plum-dim:#2e1e40;--plum-text:#c8a8e0;--pink:#d8788a;--pink-dim:#3a1825;--pink-text:#f0a0b0;--gold:#d4aa58;--gold-dim:#2e2208;--gold-text:#f0cc80;--blue:#6a8fc0;--blue-dim:#142030;--blue-text:#90b8e8;--done:#3a3530;--done-text:#5a5248}
@@ -1672,113 +1671,153 @@ function fallbackCopy(el, cb) {
 }
 
 // ── DAY SNAPSHOT PDF ──────────────────────────────────────────
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/\n/g,'<br>');
+// Native-text PDF: white, print-friendly, paginates line by line.
+// Fonts: Helvetica (built in; closest embeddable match to Avenir/Arial).
+function pdfSafe(str) {
+  // built-in PDF fonts support Latin-1 + common punctuation (keeps Spanish accents); drops emoji/symbols
+  return String(str == null ? '' : str)
+    .replace(/[^\u0009\u000A -~ -ÿ‘’“”–—…•]/g, '');
 }
 
-function buildSnapshotEl() {
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'position:absolute;left:-9999px;top:0;width:720px;padding:44px 40px;background:#0e0c0a;color:#f0ebe2;font-family:"DM Mono",monospace;';
-
-  const d = orbit[viewedDayIdx];
-  const dateText = document.getElementById('dateLine').textContent;
-  const mantraText = document.getElementById('mantraLine').textContent;
-  const energyNote = document.getElementById('energyNote').textContent;
-  const intention = document.getElementById('weeklyIntention').value || '—';
-
-  const todayThree = ['today-1','today-2','today-3'].map(id => {
-    const el = document.getElementById(id);
-    const done = el.closest('.focus-item').classList.contains('done');
-    return { text: el.value || '(empty)', done };
-  });
-  const tmrwThree = ['tmrw-1','tmrw-2','tmrw-3'].map(id => {
-    const el = document.getElementById(id);
-    return { text: el.value || '(empty)' };
-  });
-
-  const morningPrompt = document.getElementById('morningPrompt').textContent;
-  const morningReflect = document.getElementById('morningReflect').value || '—';
-  const brainDump = document.getElementById('brainDump').value || '—';
-  const eodLearn = document.getElementById('eodLearn').value || '—';
-  const eodPrompt = document.getElementById('eodPrompt').textContent;
-  const eodReflect = document.getElementById('eodReflect').value || '—';
-  const moods = Array.from(document.querySelectorAll('.mood-tag.selected')).map(t => t.textContent);
-  const upcomingToday = upcoming.filter(u => u.text).map(u => `${u.type}: ${u.text}`);
-  const sprintActive = sprintItems.filter(s => s.status === 'active').map(s => s.text);
-  const activityItems = getActivity().filter(a => a.text);
-
-  function section(title, color, bodyHtml) {
-    return `<div style="margin-bottom:20px;padding:18px 20px;border-radius:10px;background:#1c1814;border:1px solid #2e2820;">
-      <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:${color};margin-bottom:10px;">${title}</div>
-      ${bodyHtml}
-    </div>`;
-  }
-
-  wrap.innerHTML = `
-    <div style="margin-bottom:26px;">
-      <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8a8070;">${escapeHtml(d.day.toLowerCase())} | ${d.num} — the daily orbit</div>
-      <div style="font-family:'Playfair Display',serif;font-size:30px;font-weight:500;color:#f0ebe2;margin:4px 0 6px;">${escapeHtml(dateText)}</div>
-      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:#c8a8e0;margin-bottom:10px;">${escapeHtml(mantraText)}</div>
-      <div style="font-size:11px;color:#8a8070;">energy: ${escapeHtml(energyNote)}</div>
-    </div>
-
-    ${section('weekly intention', '#c8a8e0', `<div style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;">${escapeHtml(intention)}</div>`)}
-
-    ${section("today's three", '#8ecca0', todayThree.map((t,i) => `<div style="padding:6px 0;font-size:13px;${t.done ? 'text-decoration:line-through;color:#5a5248;' : ''}">${i+1}. ${escapeHtml(t.text)}</div>`).join(''))}
-
-    ${section('morning reflection', '#c8a8e0', `<div style="font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#c8a8e0;margin-bottom:8px;">${escapeHtml(morningPrompt)}</div><div style="font-size:13px;">${escapeHtml(morningReflect)}</div>`)}
-
-    ${upcomingToday.length ? section('upcoming', '#90b8e8', upcomingToday.map(u => `<div style="font-size:13px;padding:4px 0;">${escapeHtml(u)}</div>`).join('')) : ''}
-
-    ${sprintActive.length ? section('current sprint — active', '#8ecca0', sprintActive.map(s => `<div style="font-size:13px;padding:4px 0;">${escapeHtml(s)}</div>`).join('')) : ''}
-
-    ${section('brain dump', '#f0cc80', `<div style="font-size:13px;">${escapeHtml(brainDump)}</div>`)}
-
-    ${activityItems.length ? section('activity log', '#f0cc80', activityItems.map(a => `<div style="font-size:13px;padding:4px 0;"><span style="color:#8a8070;font-size:11px;margin-right:10px;">${escapeHtml(fmtTime(a.ts))}</span>${escapeHtml(a.text)}</div>`).join('')) : ''}
-
-    ${section("tomorrow's three", '#8ecca0', tmrwThree.map((t,i) => `<div style="padding:6px 0;font-size:13px;">${i+1}. ${escapeHtml(t.text)}</div>`).join(''))}
-
-    ${section('what did i learn today?', '#c8a8e0', `<div style="font-size:13px;margin-bottom:10px;">${escapeHtml(eodLearn)}</div>${moods.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;">${moods.map(m => `<span style="font-size:10px;padding:3px 10px;border-radius:20px;background:#a07ab0;color:#f0ebe2;">${escapeHtml(m)}</span>`).join('')}</div>` : ''}`)}
-
-    ${section("tomorrow's prompt", '#c8a8e0', `<div style="font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#c8a8e0;margin-bottom:8px;">${escapeHtml(eodPrompt)}</div><div style="font-size:13px;">${escapeHtml(eodReflect)}</div>`)}
-  `;
-
-  return wrap;
-}
-
-async function saveDaySnapshot(btn) {
-  if (typeof html2canvas === 'undefined' || !window.jspdf) {
-    alert('PDF tools are still loading — give it a second and try again.');
-    return;
-  }
+function saveDaySnapshot(btn) {
+  if (!window.jspdf) { alert('PDF tools are still loading — give it a second and try again.'); return; }
   const originalText = btn.innerHTML;
   btn.disabled = true;
   btn.textContent = 'generating…';
 
-  const snap = buildSnapshotEl();
-  document.body.appendChild(snap);
-
   try {
-    const canvas = await html2canvas(snap, { backgroundColor: '#0e0c0a', scale: 2, useCORS: true });
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'pt', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({ unit: 'pt', format: 'letter' });
+    const W = pdf.internal.pageSize.getWidth();
+    const H = pdf.internal.pageSize.getHeight();
+    const M = 54, CW = W - M * 2;
+    let y = M;
 
-    let heightLeft = imgHeight;
-    let position = 0;
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+    const FONT = 'helvetica';
+    const INK = [30, 26, 22], DIM = [125, 117, 105], RULE = [222, 216, 208];
+    const PLUM = [112, 72, 142], GREEN = [58, 118, 80], GOLD = [150, 108, 28], BLUE = [64, 100, 150];
+
+    const ensure = h => { if (y + h > H - M - 12) { pdf.addPage(); y = M; } };
+
+    function para(text, o = {}) {
+      const { size = 10.5, style = 'normal', color = INK,
+              indent = 0, gap = 4, strike = false, width = CW - indent } = o;
+      pdf.setFont(FONT, style); pdf.setFontSize(size); pdf.setTextColor(...color);
+      const lh = size * 1.5;
+      pdfSafe(text).split('\n').forEach(raw => {
+        const ls = raw.trim() === '' ? [''] : pdf.splitTextToSize(raw, width);
+        ls.forEach(l => {
+          ensure(lh);
+          pdf.text(l, M + indent, y + size);
+          if (strike && l) {
+            const tw = pdf.getTextWidth(l);
+            pdf.setDrawColor(...DIM); pdf.setLineWidth(0.6);
+            pdf.line(M + indent, y + size * 0.62, M + indent + tw, y + size * 0.62);
+          }
+          y += lh;
+        });
+      });
+      y += gap;
+    }
+
+    function section(title, color) {
+      ensure(70); // keep title with at least a few lines of content
+      y += 16;
+      pdf.setFont(FONT, 'bold'); pdf.setFontSize(8); pdf.setTextColor(...color);
+      pdf.text(title.toUpperCase(), M, y + 8, { charSpace: 1.4 });
+      y += 15;
+      pdf.setDrawColor(...RULE); pdf.setLineWidth(0.5);
+      pdf.line(M, y, W - M, y);
+      y += 9;
+    }
+
+    const body = (t, o = {}) => para(t && t.trim() ? t : '—', { color: t && t.trim() ? INK : DIM, ...o });
+
+    // ── header
+    const d = orbit[viewedDayIdx];
+    pdf.setFont(FONT, 'bold'); pdf.setFontSize(8); pdf.setTextColor(...DIM);
+    pdf.text(`${d.day.toLowerCase()} | ${d.num} — THE DAILY ORBIT`.toUpperCase(), M, y + 8, { charSpace: 1.4 });
+    y += 22;
+    para(document.getElementById('dateLine').textContent, { size: 26, style: 'bold', gap: 2 });
+    para(document.getElementById('mantraLine').textContent, { size: 12, style: 'italic', color: PLUM, gap: 4 });
+    para('energy: ' + document.getElementById('energyNote').textContent, { size: 9, color: DIM, gap: 0 });
+
+    // ── weekly intention
+    section('weekly intention', PLUM);
+    body(document.getElementById('weeklyIntention').value, { style: 'italic', size: 12 });
+
+    // ── three-item lists
+    function threeList(ids, showChecks) {
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        const done = showChecks && el.closest('.focus-item').classList.contains('done');
+        const txt = el.value.trim();
+        ensure(10.5 * 1.5);
+        pdf.setDrawColor(...(done ? GREEN : DIM)); pdf.setLineWidth(0.8);
+        pdf.rect(M, y + 3, 9, 9);
+        if (done) { pdf.setLineWidth(1.2); pdf.line(M + 1.8, y + 7.5, M + 4, y + 10); pdf.line(M + 4, y + 10, M + 7.6, y + 4.6); }
+        para(txt || '—', { indent: 20, gap: 3, color: !txt ? DIM : (done ? DIM : INK), strike: done && !!txt });
+      });
+    }
+    section("today's three", GREEN);
+    threeList(['today-1', 'today-2', 'today-3'], true);
+
+    // ── morning reflection
+    section('morning reflection', PLUM);
+    para(document.getElementById('morningPrompt').textContent, { style: 'italic', size: 10.5, color: PLUM, gap: 5 });
+    body(document.getElementById('morningReflect').value);
+
+    // ── upcoming + sprint (only when present)
+    const upcomingToday = upcoming.filter(u => u.text).map(u => `${u.type}: ${u.text}`);
+    if (upcomingToday.length) {
+      section('upcoming', BLUE);
+      upcomingToday.forEach(u => para('•  ' + u, { gap: 2 }));
+    }
+    const sprintActive = sprintItems.filter(s => s.status === 'active').map(s => s.text);
+    if (sprintActive.length) {
+      section('current sprint — active', GREEN);
+      sprintActive.forEach(s => para('•  ' + s, { gap: 2 }));
+    }
+
+    // ── brain dump
+    section('brain dump', GOLD);
+    body(document.getElementById('brainDump').value);
+
+    // ── activity log (short entries stay whole on one page)
+    const acts = getActivity().filter(a => a.text);
+    if (acts.length) {
+      section('activity log', GOLD);
+      acts.forEach(a => {
+        const tw = 58;
+        pdf.setFont(FONT, 'normal'); pdf.setFontSize(10.5);
+        const ls = pdf.splitTextToSize(pdfSafe(a.text), CW - tw);
+        ensure(Math.min(ls.length, 4) * 10.5 * 1.5);
+        pdf.setFont(FONT, 'normal'); pdf.setFontSize(8.5); pdf.setTextColor(...DIM);
+        pdf.text(pdfSafe(fmtTime(a.ts)), M, y + 10.5);
+        para(a.text, { indent: tw, gap: 3 });
+      });
+    }
+
+    // ── tomorrow's three
+    section("tomorrow's three", GREEN);
+    threeList(['tmrw-1', 'tmrw-2', 'tmrw-3'], false);
+
+    // ── end of day
+    section('what did i learn today?', PLUM);
+    body(document.getElementById('eodLearn').value);
+    const moods = Array.from(document.querySelectorAll('.mood-tag.selected')).map(t => t.textContent);
+    if (moods.length) para('landing: ' + moods.join('  ·  '), { size: 9.5, color: PLUM, gap: 4 });
+
+    section("tomorrow's prompt", PLUM);
+    para(document.getElementById('eodPrompt').textContent, { style: 'italic', size: 10.5, color: PLUM, gap: 5 });
+    body(document.getElementById('eodReflect').value);
+
+    // ── footer on every page
+    const n = pdf.getNumberOfPages();
+    for (let i = 1; i <= n; i++) {
+      pdf.setPage(i);
+      pdf.setFont(FONT, 'normal'); pdf.setFontSize(7.5); pdf.setTextColor(...DIM);
+      pdf.text(`the daily orbit  ·  ${i} / ${n}`, W / 2, H - 28, { align: 'center', charSpace: 0.8 });
     }
 
     const dateLabel = (document.getElementById('dateLine').textContent || todayStr)
@@ -1788,7 +1827,6 @@ async function saveDaySnapshot(btn) {
     console.error(err);
     alert('could not generate the PDF — try again.');
   } finally {
-    document.body.removeChild(snap);
     btn.disabled = false;
     btn.innerHTML = originalText;
   }
